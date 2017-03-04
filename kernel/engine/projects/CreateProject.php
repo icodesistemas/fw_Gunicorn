@@ -16,6 +16,7 @@
         private function setCreateDirectories(){
             $name_project = $this->base_dir . ucwords($this->name) . '_Project';
             $file_htaccess = __DIR__ . '/modelProject/htaccess.txt';
+            $file_ignore = __DIR__ . '/modelProject/gitignore.txt';
 
             /* create folder for project */
             if(!mkdir($name_project, 0755)){
@@ -24,6 +25,8 @@
 
             /* create htaccess file for project */
             copy($file_htaccess, $this->base_dir . '.htaccess');
+
+            copy($file_ignore, $this->base_dir . '.gitignore');
 
             /* create folder static file for project */
             if(!mkdir($this->base_dir . 'static', 0755)){
@@ -66,25 +69,36 @@
             return hash('sha256',md5(sha1($cadena). sha1($semilla)));
             
         }
-        private function setCreateFileSettingProject($dir){
-            $file_setting = __DIR__ . '/modelProject/settings.txt';
-            $file_setting_project = $dir . '/settings.php';
+        private function setCreateFileSettingProject($dir){            
+            $file_settings = __DIR__ . '/modelProject/settings.txt';
+            $file_settings_project = $this->base_dir . ucwords($this->name) . '_Project/' . 'settings.php';
             $params = array(
+                'name_project' => ucwords($this->name) . '_Project',
                 'secret_key' => $this->getGenerateSecretKey(),
-                'project_name' => ucwords($this->name)
             );
 
-            $reader = fopen($file_setting, 'r');
-            $index_example = fread($reader, filesize($file_setting));
-            fclose($reader);
+            /*se almacean las lineas leidas*/
+            $line_read = array();
 
-            /* create index file settings for project */
-            $index_project = fopen($file_setting_project, 'w');
-            foreach ($params as $key => $value) {
-                $line = str_replace('{%' . $key .'%}', $value, $index_example);
-                fwrite($index_project, $line);
+            /*archivo de destino, donde se escribira las lineas del archivo $file_settings*/
+            $settings_project = fopen($file_settings_project, 'w');
+
+            /* se lee el archivo file_settings */
+            $reader = fopen($file_settings, 'r');
+            while(!feof($reader)) {
+                $linea = fgets($reader);
+                if(!in_array($linea, $line_read, true)){
+                    foreach ($params as $key => $value) {
+                        if(preg_match("/$key/", $linea))
+                            $linea = str_replace('{%' . $key .'%}', $value, $linea);
+
+                    }
+                }
+                fwrite($settings_project, $linea);
+                $line_read = array_merge($line_read, array($linea));
             }
-            fclose($index_project);
+            fclose($reader);
+            
         }
         private function setCreateFileIndexProject(){
             $file_index = __DIR__ . '/modelProject/index.txt';
@@ -93,17 +107,27 @@
                 'name_project' => ucwords($this->name) . '_Project'
             );
 
-            $reader = fopen($file_index, 'r');
-            $index_example = fread($reader, filesize($file_index));
-            fclose($reader);
+            /*se almacean las lineas leidas*/
+            $line_read = array();
 
-            /* create index file settings for project */
+            /*archivo de destino, donde se escribira las lineas del archivo $file_settings*/
             $index_project = fopen($file_index_project, 'w');
-            foreach ($params as $key => $value) {
-                $line = str_replace('{%' . $key .'%}', $value, $index_example);
-                fwrite($index_project, $line);
+
+            /* se lee el archivo file_settings */
+            $reader = fopen($file_index, 'r');
+            while(!feof($reader)) {
+                $linea = fgets($reader);
+                if(!in_array($linea, $line_read, true)){
+                    foreach ($params as $key => $value) {
+                        if(preg_match("/$key/", $linea))
+                            $linea = str_replace('{%' . $key .'%}', $value, $linea);
+
+                    }
+                }
+                fwrite($index_project, $linea);
+                $line_read = array_merge($line_read, array($linea));
             }
-            fclose($index_project);
+            fclose($reader);
         }
         private function setCreateUrlFiel($url_file){
             $file_url_project = $url_file;
@@ -115,13 +139,26 @@
             $params = array(
                 'project_name' => $this->name,
             );
-            /* create file urls for project */
+            /*se almacean las lineas leidas*/
+            $line_read = array();
 
-            $url_app = fopen($file_url_project, 'w');
-            foreach ($params as $key => $value) {
-                $line = str_replace('{%' . $key .'%}', $value, $url_example);
-                fwrite($url_app, $line);
+            /*archivo de destino, donde se escribira las lineas del archivo $file_settings*/
+            $url_project = fopen($file_url_project, 'w');
+
+            /* se lee el archivo file_settings */
+            $reader = fopen($file_url, 'r');
+            while(!feof($reader)) {
+                $linea = fgets($reader);
+                if(!in_array($linea, $line_read, true)){
+                    foreach ($params as $key => $value) {
+                        if(preg_match("/$key/", $linea))
+                            $linea = str_replace('{%' . $key .'%}', $value, $linea);
+
+                    }
+                }
+                fwrite($url_project, $linea);
+                $line_read = array_merge($line_read, array($linea));
             }
-            fclose($url_app);
+            fclose($reader);
         }
     }

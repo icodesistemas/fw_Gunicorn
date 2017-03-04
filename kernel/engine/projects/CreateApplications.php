@@ -34,23 +34,33 @@
 
         private function setCreateControllers($folder_new_apps){
 
-            $file_index = __DIR__ . '/modelProject/controller.txt';
+            $file_controller = __DIR__ . '/modelProject/controller.txt';
             $folder_new_apps = $folder_new_apps . '/'. ucwords($this->name).'Controller.php';
             $params = array(
                 'name_app' => ucwords($this->name)
             );
 
-            $reader = fopen($file_index, 'r');
-            $index_example = fread($reader, filesize($file_index));
-            fclose($reader);
+            /*se almacean las lineas leidas*/
+            $line_read = array();
 
-            /* create controller file for application */
-            $controller = fopen($folder_new_apps, 'w');
-            foreach ($params as $key => $value) {
-                $line = str_replace('{%' . $key .'%}', $value, $index_example);
-                fwrite($controller, $line);
+            /*archivo de destino, donde se escribira las lineas del archivo $file_settings*/
+            $new_apps = fopen($folder_new_apps, 'w');
+
+            /* se lee el archivo file_settings */
+            $reader = fopen($file_controller, 'r');
+            while(!feof($reader)) {
+                $linea = fgets($reader);
+                if(!in_array($linea, $line_read, true)){
+                    foreach ($params as $key => $value) {
+                        if(preg_match("/$key/", $linea))
+                            $linea = str_replace('{%' . $key .'%}', $value, $linea);
+
+                    }
+                }
+                fwrite($new_apps, $linea);
+                $line_read = array_merge($line_read, array($linea));
             }
-            fclose($controller);
+            fclose($reader);
         }
     }
 ?>

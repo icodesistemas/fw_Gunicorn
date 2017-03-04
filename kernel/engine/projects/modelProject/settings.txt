@@ -1,5 +1,5 @@
 <?php
-namespace {%project_name%}_Project;
+namespace {%name_project%};
 
 /* extension file for templates */
 define('EXT_TEMPLATE','twig');
