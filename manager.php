@@ -1,7 +1,7 @@
 #!/usr/bin/php
 <?php
 
-$base_dir = __DIR__ . '/';
+$base_dir = __DIR__ . '/../';
 spl_autoload_register(function ($nombre_clase) {
 
     if(file_exists($nombre_clase . '.php'))
@@ -22,8 +22,8 @@ switch ($command){
             exit('please specify name for your project');
         }
 
-        require 'fw_iCode/engine/projects/CreateProject.php';
-        new \fw_iCode\engine\projects\CreateProject($argv['2'], $base_dir);
+        require 'kernel/engine/projects/CreateProject.php';
+        new \fw_Gunicorn\kernel\engine\projects\CreateProject($argv['2'], $base_dir);
         break;
 
     case 'startapp':
@@ -31,8 +31,8 @@ switch ($command){
         if(!isset($argv['2'])){
             exit('please specify name for your application');
         }
-        require 'fw_iCode/engine/projects/CreateApplications.php';
-        new \fw_iCode\engine\projects\CreateApplications($argv['2'], $base_dir);
+        require 'kernel/engine/projects/CreateApplications.php';
+        new \fw_Gunicorn\kernel\engine\projects\CreateApplications($argv['2'], $base_dir);
         break;
 
     case 'sync':
