@@ -1,0 +1,34 @@
+<?php
+namespace {%project_name%}_Project;
+
+/* extension file for templates */
+define('EXT_TEMPLATE','twig');
+
+define('SECRET_KEY', '56d6d15b9c0034a3f2a3d22731a83610515930aaa0b0e88b0c6f4c1a2fcb4b4e');
+
+define('SESSION_COOKIE_AGE',60 * 24);
+
+ /* define your directory main */
+define('BASE_DIR', __DIR__.'/../');
+
+/* applications install */
+define('APP_INSTALL',serialize([
+    'fw_iCode.engine.applications.login.Login'
+]));
+
+/* parameters for connecting the database */
+define('DATABASE', serialize(array(
+    'ENGINE' => 'sqlite',
+    'ROUTE_DB' => BASE_DIR . 'db.sqlite3',
+
+)));
+
+/* the name for ntemplate */
+define('TEMPLATE_DIR','templates');
+
+if(!isset($_REQUEST['argv'])){
+    /* include framework */
+    require BASE_DIR.'fw_Gunicorn/kernel/engine.php';
+
+    require 'urls.php';
+}
