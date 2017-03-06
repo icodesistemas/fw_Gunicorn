@@ -19,7 +19,7 @@ define('BASE_DIR', __DIR__.'/../');
 
 /* applications install */
 define('APP_INSTALL',serialize([
-    'fw_iCode.engine.applications.login.Login'
+    'fw_Gunicorn.engine.applications.login'
 ]));
 
 /* parameters for connecting the database */
@@ -32,7 +32,7 @@ define('DATABASE', serialize(array(
 /* the name for ntemplate */
 define('TEMPLATE_DIR','templates');
 
-if(!isset($_REQUEST['argv'])){
+if(isset($_SERVER['REQUEST_URI'])){
     /* include framework */
     require BASE_DIR.'fw_Gunicorn/kernel/engine.php';
 

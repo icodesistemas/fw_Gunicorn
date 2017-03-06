@@ -1,17 +1,21 @@
 <?php
 namespace fw_Gunicorn\kernel\classes\abstracts;
 
-use fw_iCode\classes\interfaces\iModels;
-use fw_iCode\engine\dataBase\ConexionDataBase;
+use fw_Gunicorn\kernel\classes\interfaces\iModels;
+use fw_Gunicorn\kernel\engine\dataBase\ConexionDataBase;
 
 class aModels implements iModels {
     private $db;
     private $table;
     public function __construct($table)
     {
+        if(!defined('DATABASE'))
+            die('Please submit the login credentials to the database');
+
         $this->db = new ConexionDataBase();
+        $this->setTable($table);
     }
-    public function setTable($table){
+    private function setTable($table){
         $this->table = $table;
     }
     public function getData($field, $conditions, $limit = '', $groupBy = '', $having = '')

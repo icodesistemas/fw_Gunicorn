@@ -6,9 +6,10 @@ $base_dir = __DIR__ . '/../';
 spl_autoload_register(function ($nombre_clase) {
     $file = BASE_DIR . $nombre_clase . '.php';
     $file =str_replace('\\','/', $file);
+
     if(file_exists($file))
         include $file;
-    
+
 });
 /* Detects if a command specified */
 if (count($argv) == 1){

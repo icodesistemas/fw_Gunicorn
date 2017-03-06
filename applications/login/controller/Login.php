@@ -1,5 +1,5 @@
 <?php
-namespace fw_Gunicorn\kernel\engine\applications\login;
+namespace fw_Gunicorn\applications\login;
 use fw_Gunicorn\kernel\classes\abstracts\aLogin;
 
 
