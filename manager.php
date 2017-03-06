@@ -1,11 +1,14 @@
 #!/usr/bin/php
 <?php
+namespace fw_Gunicorn;
 
 $base_dir = __DIR__ . '/../';
 spl_autoload_register(function ($nombre_clase) {
-
-    if(file_exists($nombre_clase . '.php'))
-        include $nombre_clase . '.php';
+    $file = BASE_DIR . $nombre_clase . '.php';
+    $file =str_replace('\\','/', $file);
+    if(file_exists($file))
+        include $file;
+    
 });
 /* Detects if a command specified */
 if (count($argv) == 1){
@@ -43,7 +46,8 @@ switch ($command){
         $app = $argv['2'];
         /* determie project directory */
 
-        $ruta = __DIR__ . 'manager.php/';
+        $ruta = __DIR__ . '/../';
+
         $dh = opendir($ruta);
         $dir_project = '';
         while(($file = readdir($dh)) !== false){
@@ -54,18 +58,20 @@ switch ($command){
         if(empty($dir_project)){
             die('Unexpected error, unable to determine project directory');
         }
-        require $dir_project.'/settings.php';
+        require $ruta . $dir_project.'/settings.php';
 
         /* synchronized the requested application */
+
+
         $array_apps = unserialize(APP_INSTALL);
         foreach ($array_apps as $value){
             $application = ".".$app;
-
             if(preg_match("/$application/", $value)){
 
-                $namespace_app = str_replace('.', '\\', $value);
-                $instance = new $namespace_app();
-                $instance->sync();
+                $path_file = str_replace('.', '/', $value);
+
+                require 'kernel/engine/dataBase/Sync.php';
+                \fw_Gunicorn\kernel\engine\dataBase\Sync\SyncApplications($path_file);
             }
         }
 //        require
