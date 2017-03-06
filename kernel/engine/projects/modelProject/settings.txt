@@ -1,6 +1,12 @@
 <?php
 namespace {%name_project%};
 
+/* domain name the application web */
+define('DOMAIN_NAME', 'http://localhost');
+
+/* the folder folder for file static */
+define('STATICFILES_DIRS', 'static');
+
 /* extension file for templates */
 define('EXT_TEMPLATE','twig');
 

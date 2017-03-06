@@ -11,7 +11,14 @@ class Urls{
 
     public function __construct(){
         /* captura la url invocada en el browser */
-        $this->current_url = isset($_GET['uri']) ? '/'.$_GET['uri'] : '/';;
+        $basepath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+        $uri = substr($_SERVER['REQUEST_URI'], strlen($basepath));
+        if (strstr($uri, '?')) $uri = substr($uri, 0, strpos($uri, '?'));
+        $uri = '/' . trim($uri, '/');
+
+        $this->current_url = $uri;
+
+        
 
         /* se crea  array como "/" que compone la url */
         $this->_params_url = $this->getCreateParams($this->current_url);
@@ -56,6 +63,7 @@ class Urls{
         echo '<br />';echo '<br />';echo '<br />';echo '<br />';*/
 
         foreach ($this->_pattern as $key => $value){
+            
             if($value == ''){
                 if(preg_match("#^/$value$#", $this->current_url)){
                     $this->instanceController($key);
@@ -63,7 +71,6 @@ class Urls{
             }else{
                 /* Create an array for each pattern written in urls file */
                 $patter = $this->getCreateParams($value);
-
                 /* verifica que el patro escrito en el urls file coincide con los parametros de la url */
                if( $this->getMatchPatters($patter) ){
 
@@ -81,8 +88,8 @@ class Urls{
 
         foreach ($patters as $key => $condicion){
             /* se obtine el contenido de la url */
-            $value = $this->_params_url[$key];
-
+            $value = $this->_params_url[$key];     
+            //echo $condicion. ' '.$value.'<br />';       
             /* indice del array es 0 y no coincide el primer parametro de la url retorna 404 */
             if($key == 0 && !preg_match('/^'.$condicion.'+$/i', $value)){
                 /*404*/
@@ -105,7 +112,7 @@ class Urls{
         return true;
     }
 
-    private function instanceController($indx){
+    private function instanceController($indx){        
         $controller = explode('.',$this->_controller[$indx]);
 
         /* index 0 is application name */
@@ -129,7 +136,7 @@ class Urls{
         }
 
         $controller = new $namespace(BASE_DIR . 'apps/' . $application . '/');
-        $controller->setPathApplication('apps\\' .$application .'\\');
+        //$controller->setPathApplication('apps\\' .$application .'\\');
 
         if(!empty($method)){
 
