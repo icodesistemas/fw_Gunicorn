@@ -86,8 +86,7 @@ class CreateTable{
             $db->exec($create);
             echo 'table ' . self::$table_name . ' finish' . PHP_EOL;
         }catch (\PDOException $e){
-            echo $e->errorInfo[2]. PHP_EOL;
-            print_r(self::$field) . PHP_EOL;
+            echo $e->errorInfo[2]. PHP_EOL . self::$field . PHP_EOL;
             /*if( $e->getCode() == 'HY000')
                 print("The table already exists " . self::$table_name . PHP_EOL);*/
 
