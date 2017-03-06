@@ -16,10 +16,13 @@ class Session extends aModels{
     public function __init__(){
         CreateTable::_new('fw_icode_session',[
             TypeFields\FieldInteger('session_id', true),
-            TypeFields\FieldText('session_data',true, true),
+            TypeFields\FieldText('session_data',true),
             TypeFields\FieldDateTime('expire_date',true),
-            TypeFields\FieldChar('status', true,false,1)
+            TypeFields\FieldChar('status', true, 1)
         ]);
         CreateTable::_primaryKey('session_id');
+        CreateTable::_unique(array(
+            'expire_date'
+        ));
     }
 }

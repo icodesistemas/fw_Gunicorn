@@ -5,24 +5,23 @@
  */
 namespace fw_Gunicorn\kernel\engine\dataBase\TypeFields;
 
-function FieldString($name_field, $max_length, $notNull, $unique = false, $default = ''){
+function FieldString($name_field, $max_length, $notNull, $default = ''){
     $sgdb = '';
-    $campo = '';
+    $campo = $name_field;
     $type = '';
     if(defined('DATABASE')){
         $database = unserialize(DATABASE);
         $sgdb = $database['ENGINE'];
     }
-
     switch ($sgdb){
         case 'pgsql':
-            $campo = "character varying ($max_length) ";
+            $campo .= " character varying ($max_length) ";
             break;
         case 'mysql':
-            $campo = 'varchar';
+            $campo .= ' varchar ($max_length)';
             break;
         case 'sqlite':
-            $campo = 'text';
+            $campo .= ' text';
             break;
         default:
             die('Error, database engine is not defined');
@@ -34,13 +33,11 @@ function FieldString($name_field, $max_length, $notNull, $unique = false, $defau
     if(!empty($default))
         $campo .= " DEFAULT '$default' ";
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
 
     return $campo;
 }
 
-function FieldText($name_field, $notNull, $unique = false, $default = ''){
+function FieldText($name_field, $notNull, $default = ''){
     $campo = $name_field . ' text';
     if ($notNull)
         $campo .= " NOT NULL ";
@@ -48,12 +45,9 @@ function FieldText($name_field, $notNull, $unique = false, $default = ''){
     if(!empty($default))
         $campo .= " DEFAULT '$default' ";
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
-
     return $campo;
 }
-function FieldInteger($name_field, $notNull,$unique = false, $default = ''){
+function FieldInteger($name_field, $notNull, $default = ''){
     $sgdb = '';
     if(defined('DATABASE')){
         $database = unserialize(DATABASE);
@@ -81,13 +75,11 @@ function FieldInteger($name_field, $notNull,$unique = false, $default = ''){
     if(!empty($default))
         $campo .= " DEFAULT $default ";
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
 
     return $campo;
 }
 
-function FieldFloat($name_field, $max_digits, $decimal_places, $notNull,$unique=false, $default = ''){
+function FieldFloat($name_field, $max_digits, $decimal_places, $notNull, $default = ''){
     $sgdb = '';
     if(defined('DATABASE')){
         $database = unserialize(DATABASE);
@@ -113,9 +105,6 @@ function FieldFloat($name_field, $max_digits, $decimal_places, $notNull,$unique=
 
     if(!empty($default))
         $campo .= " DEFAULT $default ";
-
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
 
     return $campo;
 }
@@ -149,7 +138,7 @@ function FieldBoolean($name_field, $notNull, $default = ''){
 
     return $campo;
 }
-function FieldChar($name_field, $notNull,$unique = false, $default = ''){
+function FieldChar($name_field, $notNull, $default = ''){
     $sgdb = '';
     if(defined('DATABASE')){
         $database = unserialize(DATABASE);
@@ -176,12 +165,9 @@ function FieldChar($name_field, $notNull,$unique = false, $default = ''){
     if(!empty($default))
         $campo .= " DEFAULT '$default' ";
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
-
     return $campo;
 }
-function FieldDate($name_field, $notNull, $unique = false, $default = ''){
+function FieldDate($name_field, $notNull, $default = ''){
     $campo = $name_field.' date';
 
     if ($notNull)
@@ -190,12 +176,9 @@ function FieldDate($name_field, $notNull, $unique = false, $default = ''){
     if(!empty($default))
         $campo .= " DEFAULT $default ";
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
-
     return $campo;
 }
-function FieldDateTime($name_field, $notNull, $unique = false, $default = ''){
+function FieldDateTime($name_field, $notNull, $default = ''){
     $sgdb = '';
     if(defined('DATABASE')){
         $database = unserialize(DATABASE);
@@ -204,13 +187,13 @@ function FieldDateTime($name_field, $notNull, $unique = false, $default = ''){
     $campo = $name_field;
     switch ($sgdb){
         case 'pgsql':
-            $campo = ' timestamp without time zone';
+            $campo .= ' timestamp without time zone';
             break;
         case 'mysql':
-            $campo = ' datetime';
+            $campo .= ' datetime';
             break;
         case 'sqlite':
-            $campo = ' datetime';
+            $campo .= ' datetime';
             break;
         default:
             die('Error, database engine is not defined');
@@ -220,14 +203,12 @@ function FieldDateTime($name_field, $notNull, $unique = false, $default = ''){
         $campo .= " NOT NULL ";
 
     if(!empty($default))
-        $campo .= " DEFAULT $default ";
+        $campo .= " DEFAULT '$default' ";
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
 
     return $campo;
 }
-function FieldAutoField($name_field, $unique){
+function FieldAutoField($name_field){
     $sgdb = '';
     $campo = $name_field;
 
@@ -237,21 +218,19 @@ function FieldAutoField($name_field, $unique){
     }
     switch ($sgdb){
         case 'pgsql':
-            $campo = ' bigserial';
+            $campo .= ' bigserial';
             break;
         case 'mysql':
-            $campo = ' AUTO_INCREMENT';
+            $campo .= ' AUTO_INCREMENT';
             break;
         case 'sqlite':
-            $campo = ' AUTOINCREMENT';
+            $campo .= ' AUTO INCREMENT';
             break;
         default:
             die('Error, database engine is not defined');
             break;
     }
 
-    if($unique)
-        $campo .= " CONSTRAINT ".getNamerandom()."_UNIQ ($name_field) ";
 
     return $campo;
 }

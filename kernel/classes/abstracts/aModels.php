@@ -7,6 +7,7 @@ use fw_Gunicorn\kernel\engine\dataBase\ConexionDataBase;
 class aModels implements iModels {
     private $db;
     private $table;
+    private static  $fields = array();
     public function __construct($table)
     {
         if(!defined('DATABASE'))
@@ -47,4 +48,9 @@ class aModels implements iModels {
     {
         // TODO: Implement getAffectedRows() method.
     }
+
+    public static function setFields($field, $required){
+        self::$fields[] = array($field => $required);
+    }
+
 }

@@ -16,12 +16,11 @@ class User extends aModels {
     public function __init__(){
         CreateTable::_new('fw_gunicorn_user',[
             TypeFields\FieldString('nom_user', 80, false),
-            TypeFields\FieldString('login_user', 80, false),
-            TypeFields\FieldString('pass_user', 80, false),
-            TypeFields\FieldDateTime('date_Created', false, false,date('Y-m-d H:i:s')),
+            TypeFields\FieldString('login_user', 80, true),
+            TypeFields\FieldString('pass_user', 80, true),
+            TypeFields\FieldDateTime('date_Created', false,date('Y-m-d H:i:s')),
             TypeFields\FieldAutoField('id')
         ]);
         CreateTable::_primaryKey('id');
-
     }
 }

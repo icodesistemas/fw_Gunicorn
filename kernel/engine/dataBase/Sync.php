@@ -23,8 +23,7 @@ function getClassModel(){
                 $class = $namespaces . $var;
                 $obj = new $class;
                 $obj->__init__();
-                CreateTable::_create();
-                die();
+                CreateTable::_create($obj);
 
             }
 
