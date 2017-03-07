@@ -19,9 +19,20 @@ class aModels implements iModels {
     private function setTable($table){
         $this->table = $table;
     }
-    public function getData($field, $conditions, $limit = '', $groupBy = '', $having = '')
+    public function getData($fields, $conditions = '', $limit = '', $groupBy = '', $having = '')
     {
-        // TODO: Implement getData() method.
+        $Query = "select  $fields
+                  from $this->table ";
+        if(!empty($conditions))
+            $Query .= "where $conditions";
+
+        $data = $this->db->getArray($Query);
+
+        if(count($data) == 1){
+            return $data[0];
+        }else{
+            return $data;
+        }
     }
 
     public function setDelete($conditions, $limit = '')

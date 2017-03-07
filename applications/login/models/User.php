@@ -1,6 +1,6 @@
 <?php
 
-namespace fw_Gunicorn\applications\login\models;
+namespace apps\Admin\models;
 
 
 use fw_Gunicorn\kernel\classes\abstracts\aModels;
@@ -14,11 +14,12 @@ class User extends aModels {
     }
 
     public function __init__(){
-        CreateTable::_new('fw_gunicorn_user',[
+        CreateTable::_new('admin_user',[
             TypeFields\FieldString('nom_user', 80, false),
             TypeFields\FieldString('login_user', 80, true),
+            TypeFields\FieldString('email_user', 120, true),
             TypeFields\FieldString('pass_user', 80, true),
-            TypeFields\FieldDateTime('date_Created', false,date('Y-m-d H:i:s')),
+            TypeFields\FieldDateTime('date_Created', false, TypeFields\DateTimeNow() ),
             TypeFields\FieldAutoField('id')
         ]);
         CreateTable::_primaryKey('id');

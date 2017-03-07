@@ -234,7 +234,9 @@ function FieldAutoField($name_field){
 
     return $campo;
 }
-
+function DateTimeNow(){
+    return 'CURRENT_TIMESTAMP';
+}
 function getNamerandom(){
     $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"; //posibles caracteres a usar
     $numerodeletras=4; //numero de letras para generar el texto

@@ -86,15 +86,6 @@ class ConexionDataBase extends PDO {
             return '';
         }
     }
-    public function getRow($sql, $data=""){
-        $rs = $this->getArray($sql,$data);
-        if(count($rs)>0){
-            return $rs[0];
-        }else{
-            return 0;
-        }
-
-    }
     public function getArray($sql, $data = ""){
         //try{
         $stmt =parent::prepare($sql);
@@ -106,7 +97,12 @@ class ConexionDataBase extends PDO {
         }
         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stmt->closeCursor();
-        return $data;
+        if(count($data) > 0){
+            return $data;
+        }else{
+            return null;
+        }
+
         //}catch (PDOException $e) {
         //echo $e->getMessage();
         //}
@@ -219,6 +215,10 @@ class ConexionDataBase extends PDO {
                 break;
             case 'mysql':
                 $sql = "SHOW COLUMNS FROM " . $table;
+                break;
+            case 'sqlite':
+                $sql = 'PRAGMA table_info('.$table.')';
+                break;
             default:
                 # code...
                 break;
@@ -238,8 +238,13 @@ class ConexionDataBase extends PDO {
                 }else{
                     $COL = array_merge($COL, array("Field_".$i => array($row['field'],$row['type'])));
                 }
-            }elseif($this->conf->driver == 'mysql'){
+            }elseif($this->driver == 'mysql'){
 
+            }elseif($this->driver == 'sqlite'){
+                if(preg_match('/1/', $row['pk']))
+                    $COL = array_merge($COL, array("PK" => array($row['name'],$row['type'])));
+                else
+                    $COL = array_merge($COL, array("Field_".$i => array($row['name'],$row['type'])));
             }
 
         }
