@@ -8,6 +8,7 @@ class Urls{
     private $current_url = "/";
     private $_params_url = array(); // un array de como esta compuesta la url
     private $_params_controller  = array(); // parametros que se le pasara al controlador
+    private $_instanceMiddleware;
 
     public function __construct(){
         /* captura la url invocada en el browser */
@@ -17,8 +18,6 @@ class Urls{
         $uri = '/' . trim($uri, '/');
 
         $this->current_url = $uri;
-
-        
 
         /* se crea  array como "/" que compone la url */
         $this->_params_url = $this->getCreateParams($this->current_url);
@@ -47,20 +46,17 @@ class Urls{
      * @param $url Pattern to be fulfilled by the url in the browser
      * @param null $controller
      */
-    public function add($url, $controller = null){
+    public function add($url, $controller = null, $instanceClass = null){
         $this->setUrl($url);
 
         $this->setController($controller);
-
+        $this->_instanceMiddleware = $instanceClass;
     }
 
     /**
      * Process the url request
      */
     public function submit(){
-        /*print_r($this->_pattern);
-        print_r($this->_params_url);
-        echo '<br />';echo '<br />';echo '<br />';echo '<br />';*/
 
         foreach ($this->_pattern as $key => $value){
             
@@ -82,14 +78,13 @@ class Urls{
         }
     }
     private function getMatchPatters($patters){
-        $return = false;
         /* cantidad de parametros del patron de url */
-        $count_params_patters = count($patters);
+
 
         foreach ($patters as $key => $condicion){
             /* se obtine el contenido de la url */
             $value = $this->_params_url[$key];     
-            //echo $condicion. ' '.$value.'<br />';       
+
             /* indice del array es 0 y no coincide el primer parametro de la url retorna 404 */
             if($key == 0 && !preg_match('/^'.$condicion.'+$/i', $value)){
                 /*404*/
@@ -142,18 +137,44 @@ class Urls{
 
             if( count($this->_params_controller) > 0 ){
                 /* hay que mejorar */
-                switch ( count($this->_params_controller) ){
+                switch ( count($this->_params_controller) ) {
                     case 1:
-                        $controller->$method( $this->_params_controller[0] );
+                        if (!empty($this->_instanceMiddleware)){
+                            $controller->$method(
+                                $this->_instanceMiddleware,
+                                $this->_params_controller[0]);
+                        }else{
+                            $controller->$method($this->_params_controller[0]);
+                        }
                         break;
                     case 2:
-                        $controller->$method( $this->_params_controller[0],
-                                                $this->_params_controller[1] );
+                        if (!empty($this->_instanceMiddleware)){
+                            $controller->$method(
+                                $this->_instanceMiddleware,
+                                $this->_params_controller[0],
+                                $this->_params_controller[1]
+                            );
+                        }else{
+                            $controller->$method(
+                                $this->_params_controller[0],
+                                $this->_params_controller[1] );
+                        }
+
                         break;
                     case 3:
-                        $controller->$method( $this->_params_controller[0],
-                                                $this->_params_controller[1],
-                                                $this->_params_controller[2] );
+                        if (!empty($this->_instanceMiddleware)){
+                            $controller->$method(
+                                $this->_instanceMiddleware,
+                                $this->_params_controller[0],
+                                $this->_params_controller[1],
+                                $this->_params_controller[2] );
+                        }else{
+                            $controller->$method(
+                                $this->_params_controller[0],
+                                $this->_params_controller[1],
+                                $this->_params_controller[2] );
+                        }
+
                         break;
                     case 4:
                         $controller->$method( $this->_params_controller[0],
@@ -164,7 +185,10 @@ class Urls{
                 }
 
             }else{
-                $controller->$method();
+                if(!empty($this->_instanceMiddleware))
+                    $controller->$method($this->_instanceMiddleware);
+                else
+                    $controller->$method();
             }
 
         }

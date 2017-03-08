@@ -1,7 +1,8 @@
 <?php
 namespace fw_Gunicorn\applications\login;
 use apps\Admin\models\User;
-use fw_Gunicorn\kernel\engine\middleware;
+use fw_Gunicorn\kernel\engine\middleware\Session;
+
 
 class Login extends Session {
     private $model;
@@ -13,15 +14,21 @@ class Login extends Session {
     public function makeLogin($user, $pass)
     {
         $data = $this->model->getData(
-            'nom_user, email_user, pass_user', "'login_user = $user "
+            'nom_user, email_user,login_user, pass_user', "'login_user = $user "
         );
         if(empty($data))
             throw new Exception('The user is not registered');
+
 
         if($data['pass_user'] != Login::getEncryptPass($pass))
             throw new Exception('Invalid password');
 
         /*  aqui viene a registrar la session */
+
+        $this->setCookies('fullname', $data['nom_user']);
+        $this->setCookies('email', $data['email_user']);
+        $this->setCookies('username', $data['login_user']);
+
     }
 
     /**

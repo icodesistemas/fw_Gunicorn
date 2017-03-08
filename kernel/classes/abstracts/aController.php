@@ -40,6 +40,13 @@ abstract class aController{
 
         $twig = new Twig_Environment($this->loader_template);
 
+        if(isset($_COOKIE['csrftoken'])){
+            if(!empty($context))
+                $context = array_merge($context,array('csrftoken' => $_COOKIE['csrftoken'])) ;
+            else
+                $context = array('csrftoken' => $_COOKIE['csrftoken']);
+        }
+
         if(!empty($context)){
             $tpl = $twig->render($template.'.twig', $context);
         }else{

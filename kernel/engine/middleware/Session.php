@@ -7,11 +7,15 @@ class Session{
         //echo 'clase session';
     }
     public function setCookies($id, $value){
-        if(!isset($_COOKIE[$id]))
-            if(defined('SESSION_COOKIE_AGE'))
-                setcookie($id, md5($this->getGenerateSecretKey($value)),time()+ intval(SESSION_COOKIE_AGE));
-            else
-                setcookie($id, md5($this->getGenerateSecretKey($value)),time()+ 60*24);
+        if(isset($_COOKIE[$id]))
+            return;
+        $token = md5($this->getGenerateSecretKey($value));
+        if(defined('SESSION_COOKIE_AGE'))
+            setcookie($id, $token,time()+ intval(SESSION_COOKIE_AGE));
+        else
+            setcookie($id, $token,time()+ 60*24);
+        if($id == 'csrftoken')
+            $_SESSION['csrftoken'] = $token;
 
     }
     private function getGenerateSecretKey(){

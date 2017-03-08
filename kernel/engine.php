@@ -13,9 +13,7 @@ spl_autoload_register(function ($nombre_clase) {
 
 require BASE_DIR . '/fw_Gunicorn/vendor/autoload.php';
 
-
-
-new \fw_Gunicorn\kernel\engine\middleware\Request();
+//new Request();
 
 /* Set cookies for the session */
 $session = new \fw_Gunicorn\kernel\engine\middleware\Session();
