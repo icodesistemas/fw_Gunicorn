@@ -11,7 +11,6 @@ class CreateTable{
     private static $field = array();
     private static $pk = '';
     private static $uniq = '';
-    private static $fk = '';
     private static $table_name = '';
 
 	public static function _new($table_name, Array $fields){
@@ -28,7 +27,7 @@ class CreateTable{
         $sgdb = '';
         if(defined('DATABASE')){
             $database = unserialize(DATABASE);
-            $sgdb = $database['ENGINE'];            
+            $sgdb = $database['ENGINE'];
         }
         switch ($sgdb){
             case 'pgsql':
@@ -47,12 +46,31 @@ class CreateTable{
         self::$pk = $pk;
 
     }
-    public static function _ForeignKey($field, $table_name){
-        self::$fk = $field;
-        /*CONSTRAINT fk_xxx FOREIGN KEY (id)
-        REFERENCES public.xxx (bbbbbb) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION*/
+
+    /**
+     * @param $table_origin Modelo local
+     * @param $local_field Columna del model local
+     * @param $table_reference Nombre del model foraneo
+     * @param $field_reference Campo del modelo foraneo
+     */
+    public static function _ForeignKey($table_origin, $local_field, $table_reference, $field_reference,
+                                       $on_update = "NO ACTION", $on_delete = "NO ACTION"){
+        $fk = "
+            ALTER TABLE $table_origin
+            ADD CONSTRAINT fk_".getNamerandom()." FOREIGN KEY ($local_field)
+            REFERENCES $table_reference ($field_reference) MATCH SIMPLE
+            ON UPDATE NO $on_update
+            ON DELETE NO $on_delete
+        ";
+        $db = new ConexionDataBase();
+        try{
+            $db->exec($fk);
+            echo 'alter table ' . $table_origin . ' ForeignKey' . PHP_EOL;
+        }catch (\PDOException $e){
+            echo $e->errorInfo[2]. PHP_EOL;
+            
+
+        }
     }
     public static function _create(aModels $tableModel){
         $create = 'CREATE TABLE '.self::$table_name.' ( ';
@@ -92,13 +110,30 @@ class CreateTable{
 
         }
         self::$uniq = '';
-        self::$fk = '';
         self::$pk = '';
 
     }
 
 }
 
+
+
+function action_update($bool = false){
+    if($bool)
+        return 'NO ACTION';
+    else
+        return 'CASCADE';
+}
+function action_delete($bool = false){
+    if($bool)
+        return 'NO ACTION';
+    else
+        return 'CASCADE';
+}
+
+function action_delete_restrict(){
+    return 'RESTRICT';
+}
 
 function getNamerandom(){
     $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"; //posibles caracteres a usar
