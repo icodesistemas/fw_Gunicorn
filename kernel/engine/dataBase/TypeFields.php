@@ -94,7 +94,7 @@ function FieldFloat($name_field, $max_digits, $decimal_places, $notNull, $defaul
             $campo .= " DECIMAL($max_digits, $decimal_places)";
             break;
         case 'sqlite':
-            $campo .= " DECIMAL($max_digits, $decimal_places)";
+            $campo .= " REAL";
             break;
         default:
             die('Error, database engine is not defined');
@@ -235,7 +235,7 @@ function FieldAutoField($name_field){
     return $campo;
 }
 function DateTimeNow(){
-    return 'CURRENT_TIMESTAMP';
+    return 'now()';
 }
 function getNamerandom(){
     $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"; //posibles caracteres a usar

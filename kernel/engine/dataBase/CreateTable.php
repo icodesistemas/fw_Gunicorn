@@ -58,17 +58,18 @@ class CreateTable{
         $fk = "
             ALTER TABLE $table_origin
             ADD CONSTRAINT fk_".getNamerandom()." FOREIGN KEY ($local_field)
-            REFERENCES $table_reference ($field_reference) MATCH SIMPLE
-            ON UPDATE NO $on_update
-            ON DELETE NO $on_delete
+            REFERENCES $table_reference($field_reference) MATCH SIMPLE
+            ON UPDATE $on_update
+            ON DELETE $on_delete
         ";
         $db = new ConexionDataBase();
         try{
             $db->exec($fk);
             echo 'alter table ' . $table_origin . ' ForeignKey' . PHP_EOL;
         }catch (\PDOException $e){
-            echo $e->errorInfo[2]. PHP_EOL;
-            
+            echo $fk;
+            echo $e->getMessage(). PHP_EOL;
+            die();
 
         }
     }
@@ -86,8 +87,6 @@ class CreateTable{
             $tableModel::setFields($extract_field[0], $required);
 
          }
-        if(empty(self::$pk))
-            self::_primaryKey('id integer ');
 
 
         $create .= self::$pk . ',';
@@ -102,9 +101,9 @@ class CreateTable{
         $db = new ConexionDataBase();
         try{
             $db->exec($create);
-            echo 'table ' . self::$table_name . ' finish' . PHP_EOL;
+            echo 'table ' . self::$table_name . ' create finish' . PHP_EOL;
         }catch (\PDOException $e){
-            echo $e->errorInfo[2]. PHP_EOL . self::$field . PHP_EOL;
+            echo $e->getMessage(). PHP_EOL . print_r(self::$field) . PHP_EOL;
             /*if( $e->getCode() == 'HY000')
                 print("The table already exists " . self::$table_name . PHP_EOL);*/
 
@@ -119,13 +118,13 @@ class CreateTable{
 
 
 function action_update($bool = false){
-    if($bool)
+    if(!$bool)
         return 'NO ACTION';
     else
         return 'CASCADE';
 }
 function action_delete($bool = false){
-    if($bool)
+    if(!$bool)
         return 'NO ACTION';
     else
         return 'CASCADE';
