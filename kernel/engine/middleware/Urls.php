@@ -8,7 +8,7 @@ class Urls{
     private $current_url = "/";
     private $_params_url = array(); // un array de como esta compuesta la url
     private $_params_controller  = array(); // parametros que se le pasara al controlador
-    private $_instanceMiddleware;
+    private $_instanceMiddleware = array();
 
     public function __construct(){
         /* captura la url invocada en el browser */
@@ -50,7 +50,8 @@ class Urls{
         $this->setUrl($url);
 
         $this->setController($controller);
-        $this->_instanceMiddleware = $instanceClass;
+        if(!empty($instanceClass))
+            $this->_instanceMiddleware = array_merge($this->_instanceMiddleware, array('/'.trim($url,'/') =>$instanceClass));
     }
 
     /**
@@ -66,12 +67,14 @@ class Urls{
                 }
             }else{
                 /* Create an array for each pattern written in urls file */
+
                 $patter = $this->getCreateParams($value);
                 /* verifica que el patro escrito en el urls file coincide con los parametros de la url */
                if( $this->getMatchPatters($patter) ){
 
                    /* si la url coincide con el patron escrito en el archivo de url entonces se instancia el controlador */
                    $this->instanceController($key);
+                   break;
                }
 
             }
@@ -79,7 +82,8 @@ class Urls{
     }
     private function getMatchPatters($patters){
         /* cantidad de parametros del patron de url */
-
+        if (count($patters) != count($this->_params_url))
+            return false;
 
         foreach ($patters as $key => $condicion){
             /* se obtine el contenido de la url */
@@ -91,7 +95,10 @@ class Urls{
                 return false;
 
             }
+
             $parames_evaluated = trim(str_replace('}','', str_replace('P({','', $value)));
+
+
             if(!preg_match('/^'.$parames_evaluated.'+$/i', $value)){
                 /*404*/
                 return false;
@@ -104,6 +111,7 @@ class Urls{
                 $this->_params_controller[] = $value;
             }
         }
+
         return true;
     }
 
@@ -129,69 +137,75 @@ class Urls{
         if(!file_exists(BASE_DIR . 'apps/' . $application)){
             die('La aplicación ' . $application . ' no se encuentra instalada');
         }
-
         $controller = new $namespace(BASE_DIR . 'apps/' . $application . '/');
         //$controller->setPathApplication('apps\\' .$application .'\\');
 
-        if(!empty($method)){
+        if(empty($method)){
+            return;
+        }
+        $instans_request = false;
 
-            if( count($this->_params_controller) > 0 ){
-                /* hay que mejorar */
-                switch ( count($this->_params_controller) ) {
-                    case 1:
-                        if (!empty($this->_instanceMiddleware)){
-                            $controller->$method(
-                                $this->_instanceMiddleware,
-                                $this->_params_controller[0]);
-                        }else{
-                            $controller->$method($this->_params_controller[0]);
-                        }
-                        break;
-                    case 2:
-                        if (!empty($this->_instanceMiddleware)){
-                            $controller->$method(
-                                $this->_instanceMiddleware,
-                                $this->_params_controller[0],
-                                $this->_params_controller[1]
-                            );
-                        }else{
-                            $controller->$method(
-                                $this->_params_controller[0],
-                                $this->_params_controller[1] );
-                        }
+        foreach ($this->_instanceMiddleware as $key => $value){
+            if($key == $this->current_url)
+                $instans_request = true;
+        }
+        if( count($this->_params_controller) > 0 ){
+            /* hay que mejorar */
+            switch ( count($this->_params_controller) ) {
+                case 1:
+                    if($instans_request){
+                        $controller->$method(
+                            $this->_instanceMiddleware[$this->current_url],
+                            $this->_params_controller[0]);
+                    }else{
+                        $controller->$method($this->_params_controller[0]);
+                    }
+                    break;
+                case 2:
+                    if($instans_request){
+                        $controller->$method(
+                            $this->_instanceMiddleware[$this->current_url],
+                            $this->_params_controller[0],
+                            $this->_params_controller[1]
+                        );
+                    }else{
+                        $controller->$method(
+                            $this->_params_controller[0],
+                            $this->_params_controller[1] );
+                    }
 
-                        break;
-                    case 3:
-                        if (!empty($this->_instanceMiddleware)){
-                            $controller->$method(
-                                $this->_instanceMiddleware,
-                                $this->_params_controller[0],
-                                $this->_params_controller[1],
-                                $this->_params_controller[2] );
-                        }else{
-                            $controller->$method(
-                                $this->_params_controller[0],
-                                $this->_params_controller[1],
-                                $this->_params_controller[2] );
-                        }
-
-                        break;
-                    case 4:
-                        $controller->$method( $this->_params_controller[0],
+                    break;
+                case 3:
+                    if($instans_request){
+                        $controller->$method(
+                            $this->_instanceMiddleware[$this->current_url],
+                            $this->_params_controller[0],
                             $this->_params_controller[1],
-                            $this->_params_controller[2],
-                            $this->_params_controller[3] );
-                        break;
-                }
+                            $this->_params_controller[2] );
+                    }else{
+                        $controller->$method(
+                            $this->_params_controller[0],
+                            $this->_params_controller[1],
+                            $this->_params_controller[2] );
+                    }
 
-            }else{
-                if(!empty($this->_instanceMiddleware))
-                    $controller->$method($this->_instanceMiddleware);
-                else
-                    $controller->$method();
+                    break;
+                case 4:
+                    $controller->$method( $this->_params_controller[0],
+                        $this->_params_controller[1],
+                        $this->_params_controller[2],
+                        $this->_params_controller[3] );
+                    break;
             }
 
+        }else{
+            if($instans_request)
+                $controller->$method($this->_instanceMiddleware[$this->current_url]);
+            else
+                $controller->$method();
         }
+
+
     }
     private function includeController($path){
 

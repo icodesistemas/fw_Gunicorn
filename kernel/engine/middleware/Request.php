@@ -11,14 +11,22 @@ class Request{
     
     public function __construct()
     {
-        /* detecta si se hizo algun request */
+        $validate_toke = false;
 
-        if( (count($_GET) > 0 || count($_POST) > 0) ){
+        /* detecta si se hizo algun request */
+        if ((count($_GET) > 0)){
+            $this->type_request = 'GET';
+            $validate_toke = true;
+        }
+        if ((count($_POST) > 0)){
+            $this->type_request = 'POST';
+            $validate_toke = true;
+        }
+
+        if($validate_toke)
             if(!Request::checkCSRFTOKEN()){
                 return;
             }
-
-        }
 
         if(isset($_GET) && count($_GET) > 0){
             $this->setGet();
