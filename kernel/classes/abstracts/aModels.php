@@ -16,6 +16,9 @@ class aModels implements iModels {
         $this->db = new ConexionDataBase();
         $this->setTable($table);
     }
+    public function DB(){
+        return $this->db;
+    }
     private function setTable($table){
         $this->table = $table;
     }

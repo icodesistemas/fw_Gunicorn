@@ -16,10 +16,10 @@ class Session extends aModels implements iMigrate {
 
     public function __init__(){
         CreateTable::_new('fw_gunicorn_session',[
-            TypeFields\FieldInteger('session_id', true),
+            TypeFields\FieldString('session_id',200, true),
             TypeFields\FieldText('session_data',true),
             TypeFields\FieldDateTime('expire_date',true),
-            TypeFields\FieldChar('status', true, 1)
+            TypeFields\FieldChar('status', true, 'A')
         ]);
         CreateTable::_primaryKey('session_id');
         CreateTable::_unique(array(

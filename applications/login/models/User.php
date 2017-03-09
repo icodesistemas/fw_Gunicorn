@@ -15,7 +15,7 @@ class User extends aModels implements iMigrate {
     }
 
     public function __init__(){
-        CreateTable::_new('admin_user',[
+        CreateTable::_new('fw_gunicorn_user',[
             TypeFields\FieldString('nom_user', 80, false),
             TypeFields\FieldString('login_user', 80, true),
             TypeFields\FieldString('email_user', 120, true),

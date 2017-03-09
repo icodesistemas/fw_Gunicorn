@@ -53,8 +53,6 @@ class Request{
                 ');
         }
 
-
-
         return true;
     }
     public function isPost(){

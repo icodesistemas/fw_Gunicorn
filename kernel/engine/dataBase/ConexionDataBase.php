@@ -150,8 +150,11 @@ class ConexionDataBase extends PDO {
         $value = "values(";
         $arrayValue= "";
         $i = 1;
-
+        $pkfield = '';
         foreach ($table_data as $key => $val) {
+            if($key == 'PK'){
+                $pkfield = $val[0];
+            }
             if(count($table_data) > $i){
                 if($i == 1){
                     $value .= "?";
@@ -175,13 +178,12 @@ class ConexionDataBase extends PDO {
             $i++;
 
         }
-
         $sql = $insert.$field." ".$value;
 
-        return $this->exec($sql,explode("***",$arrayValue),"qqInsert", $table);
+        return $this->exec($sql,explode("***",$arrayValue),"qqInsert", $table, $pkfield);
 
     }
-    public function exec($sql, $data="", $action = "otro", $table = ""){
+    public function exec($sql, $data="", $action = "otro", $table = "", $fieldPk = ""){
         $stmt =parent::prepare($sql);
         if(empty($data)){
             return $stmt->execute();
@@ -189,9 +191,18 @@ class ConexionDataBase extends PDO {
             $stmt->execute($data);
 
             if($action == "qqInsert"){
-                $lastid = parent::lastInsertId();
-                $stmt->closeCursor();
-                return $lastid;
+
+                if(!empty($fieldPk)){
+                    $stmt->closeCursor();
+                    $sql = "select max(".$fieldPk.") from $table";
+                    return $this->getValue($sql);
+                }else{
+                    $stmt->closeCursor();
+                    $rowCount = $stmt->rowCount();
+                    return $rowCount;
+                }
+
+
 
             }else{
                 $stmt->closeCursor();
