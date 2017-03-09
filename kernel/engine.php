@@ -17,7 +17,9 @@ require BASE_DIR . '/fw_Gunicorn/vendor/autoload.php';
 
 /* Set cookies for the session */
 $session = new \fw_Gunicorn\kernel\engine\middleware\Session();
+$session->checkSessionActive();
 $session->setCookies('csrftoken', SECRET_KEY);
+
 //$session->destroy();
 
 

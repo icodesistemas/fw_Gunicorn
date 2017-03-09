@@ -30,35 +30,12 @@ class Login extends Session {
         if($data['pass_user'] != Login::getEncryptPass($pass))
             return 'Invalid password';
 
-        return $this->registerSession($data);
+        return $this->registerSession($data, $this->model->DB());
     }
+
     /**
-     * @param $data Datos del usuario que esta ingresando al sistema
-     */
-    private function registerSession($data){
-        if(defined('SESSION_COOKIE_AGE'))
-            $expire_sesion = time()+ intval(SESSION_COOKIE_AGE);
-        else
-            $expire_sesion = time()+ 60*24;
-
-        $id_session = $this->setCookies('sessionid', $this->getGenerateSecretKey(), $expire_sesion);
-
-        $fullname = $this->getEncrypt($data['nom_user']);
-        $email = $this->getEncrypt($data['email_user']);
-        $username = $this->getEncrypt($data['login_user']);
-
-        /* register session db */
-
-        $data = array(
-            'session_id' => $id_session,
-            'session_data' => serialize([$fullname, $email, $username]),
-            'expire_date' => date('Y-m-d H:i:s',$expire_sesion)
-        );
-        $this->model->DB()->qqInsert('fw_gunicorn_session', $data);
-        return true;
-    }
-    /**
-     * @param $pass This is the password you need to encrypt
+     * @param $pass
+     * @return string
      */
     public static function getEncryptPass($pass){
         $semilla = "ZDQ3ZmRmZTM1MjIxODk0MWUxNDRlMGQ4YmMzZTBlZjI=";

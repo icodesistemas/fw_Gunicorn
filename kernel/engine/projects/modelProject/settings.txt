@@ -12,7 +12,8 @@ define('EXT_TEMPLATE','twig');
 
 define('SECRET_KEY', '56d6d15b9c0034a3f2a3d22731a83610515930aaa0b0e88b0c6f4c1a2fcb4b4e');
 
-define('SESSION_COOKIE_AGE',60 * 24);
+/* Lifetime in seconds of cookie */
+define('SESSION_COOKIE_AGE', 86400);
 
  /* define your directory main */
 define('BASE_DIR', __DIR__.'/../');

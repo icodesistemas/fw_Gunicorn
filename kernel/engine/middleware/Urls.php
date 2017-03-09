@@ -58,7 +58,6 @@ class Urls{
      * Process the url request
      */
     public function submit(){
-
         foreach ($this->_pattern as $key => $value){
             
             if($value == ''){
