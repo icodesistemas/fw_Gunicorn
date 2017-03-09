@@ -3,10 +3,10 @@
 namespace fw_Gunicorn\kernel\engine\middleware;
 
 class Request{
-    private $post = array();
-    private $files = array();
-    private $get = array();
-    private $type_request = '';
+    private static $post = array();
+    private static $files = array();
+    private static $get = array();
+    private static $type_request = '';
     private static $excepCSRFTOKEN = array();
     
     public function __construct()
@@ -15,11 +15,11 @@ class Request{
 
         /* detecta si se hizo algun request */
         if ((count($_GET) > 0)){
-            $this->type_request = 'GET';
-            $validate_toke = true;
+            Request::$type_request = 'GET';
+
         }
         if ((count($_POST) > 0)){
-            $this->type_request = 'POST';
+            Request::$type_request = 'POST';
             $validate_toke = true;
         }
 
@@ -56,51 +56,54 @@ class Request{
         return true;
     }
     public function isPost(){
-        if($this->type_request == 'POST')
+        if(Request::$type_request == 'POST')
             return true;
         else
             return false;
     }
     public function _post($key){
-        return $this->post[$key];
+        return Request::$post[$key];
 
     }
     public function _postAll(){
-        return $this->post;
+        return Request::$post;
 
     }
     public function _get($key){
-        return $this->get[$key];
+        if(isset(Request::$get[$key]))
+            return Request::$get[$key];
+        else
+            return null;
 
     }
     public function _getAll(){
-        return $this->post;
+        return Request::$get;
 
     }
     public function _files($key){
-        return $this->files[$key];
+        return Request::$files[$key];
 
     }
     public function _filesAll(){
-        return $this->files;
+        return Request::$files;
 
     }
     private function setFiles(){
         foreach ($_FILES as $key => $value){
-            $this->files[$key] = $value;
+            Request::$files[$key] = $value;
             unset($_FILES[$key]);
         }
     }
     private function setPost(){
         foreach ($_POST as $key => $value){
-            $this->post[$key] = $value;
+            Request::$post[$key] = $value;
             unset($_POST[$key]);
             unset($_REQUEST[$key]);
         }
     }
     private function setGet(){
         foreach ($_GET as $key => $value){
-            $this->get[$key] = $value;
+            Request::$get[$key] = $value;
             unset($_GET[$key]);
             unset($_REQUEST[$key]);
         }
