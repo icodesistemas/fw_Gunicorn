@@ -37,7 +37,16 @@ class aModels implements iModels {
             return $data;
         }
     }
+    public function setAdd(Array $value, $redirect=''){
+        try{
+            $this->db->qqInsert($this->table, $value);
 
+
+        }catch (\PDOException $e){
+
+        }
+
+    }
     public function setDelete($conditions, $limit = '')
     {
         // TODO: Implement setDelete() method.

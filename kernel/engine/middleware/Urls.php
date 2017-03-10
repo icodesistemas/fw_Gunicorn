@@ -59,25 +59,28 @@ class Urls{
      */
     public function submit(){
         foreach ($this->_pattern as $key => $value){
-            
             if($value == ''){
+
                 if(preg_match("#^/$value$#", $this->current_url)){
                     $this->instanceController($key);
+                    break;
                 }
-            }else{
+            }
+            /* verificar si el patron de url definidor en el urls.php es el mismo que la url que se esta solicitando */
+            if( '/'.trim($this->current_url,'/') == '/'.trim($value,'/')){
+
                 /* Create an array for each pattern written in urls file */
 
                 $patter = $this->getCreateParams($value);
                 /* verifica que el patro escrito en el urls file coincide con los parametros de la url */
-               if( $this->getMatchPatters($patter) ){
-
-                   /* si la url coincide con el patron escrito en el archivo de url entonces se instancia el controlador */
-                   $this->instanceController($key);
-                   break;
-               }
-
+                if( $this->getMatchPatters($patter) ){
+                    /* si la url coincide con el patron escrito en el archivo de url entonces se instancia el controlador */
+                    $this->instanceController($key);
+                    break;
+                }
             }
         }
+
     }
     private function getMatchPatters($patters){
         /* cantidad de parametros del patron de url */

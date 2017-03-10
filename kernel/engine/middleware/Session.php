@@ -130,7 +130,7 @@ class Session{
         $sql = "update fw_gunicorn_session set expire_date = '".$expire."' where session_id = '".$_COOKIE['sessionid']."' ";
         $db->exec($sql);
 
-        setcookie('sessionid', $_COOKIE['sessionid'], $expire_sesion);
+        //setcookie('sessionid', $_COOKIE['sessionid'], $expire_sesion);
     }
     private function expireSession(){
 
