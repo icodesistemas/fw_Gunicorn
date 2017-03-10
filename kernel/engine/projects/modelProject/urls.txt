@@ -16,7 +16,7 @@ $route = new  middleware\Urls();
     In this example, the home of website is in the WebsiteController
 
     para que alguna parte de la url sea enviada como parametro al controlador debe ser con el siguiente formato de
-        ejemplo P{[0-9]}
+        ejemplo P{([0-9]+)}
 */
 
 $route->submit();
