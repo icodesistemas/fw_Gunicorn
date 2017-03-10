@@ -3,11 +3,8 @@
 namespace fw_Gunicorn\kernel\engine\middleware;
 
 class Urls{
-    private $_controller = array();
     private $_pattern = array();
     private $current_url = "/";
-    private $_params_url = array(); // un array de como esta compuesta la url
-    private $_params_controller  = array(); // parametros que se le pasara al controlador
     private $_instanceMiddleware = array();
 
     public function __construct(){
@@ -19,106 +16,82 @@ class Urls{
 
         $this->current_url = $uri;
 
-        /* se crea  array como "/" que compone la url */
-        $this->_params_url = $this->getCreateParams($this->current_url);
+
 
     }
-
-    /**
-     * Create an array from a url structure
-     */
-    private function getCreateParams($url){
-        if($url == '/')
-            return;
-        $array_tmp =  explode('/', filter_var(rtrim($url,'/'),FILTER_SANITIZE_URL));
-
-
-        foreach ($array_tmp as $key => $value){
-            if(empty($value)){
-                unset($array_tmp[$key]);
-            }
-        }
-        $array = array_values($array_tmp);
-        return $array;
-    }
-
     /**
      * @param $url Pattern to be fulfilled by the url in the browser
      * @param null $controller
      */
     public function add($url, $controller = null, $instanceClass = null){
-        $this->setUrl($url);
+        $this->setUrl(array($url => $controller));
 
-        $this->setController($controller);
+
         if(!empty($instanceClass))
-            $this->_instanceMiddleware = array_merge($this->_instanceMiddleware, array('/'.trim($url,'/') =>$instanceClass));
+            $this->_instanceMiddleware = array_merge($this->_instanceMiddleware, array($url =>$instanceClass));
     }
 
     /**
      * Process the url request
      */
     public function submit(){
+        /*echo '<pre>';
+        print_r($this->_pattern);
+        die();*/
         foreach ($this->_pattern as $key => $value){
-            if($value == ''){
+            /*if($value == ''){
 
                 if(preg_match("#^/$value$#", $this->current_url)){
                     $this->instanceController($key);
                     break;
                 }
-            }
+            }*/
             /* verificar si el patron de url definidor en el urls.php es el mismo que la url que se esta solicitando */
-            if( '/'.trim($this->current_url,'/') == '/'.trim($value,'/')){
+            $current_url =  trim($this->current_url,'/');
+            $value_pattern = str_replace('/','\/',trim($key,'/'));
+
+            /* quitar la sintaxis de P{[]} para expresiones regulares */
+            $value_pattern = str_replace('P{','', $value_pattern);
+
+            $value_pattern = '/^'.trim(str_replace('}','', $value_pattern),'/');
+
+            /*evalua que la url que se esta pidiendo sea la que cumpla algun patron de url definido en el urls.php del proyecto */
+
+            if(preg_match($value_pattern.'$/', $current_url)){
+                $p = 'P{';
+                $posicion_inicial_parametro = strpos($key, $p);
+                if ($posicion_inicial_parametro !== false) {
+                    $posicion_cerrar = strpos($key, '}');
+                    $parametro = str_replace('P{','',substr($key, $posicion_inicial_parametro, $posicion_cerrar));
+                    $parametro = str_replace('}','', $parametro);
+
+
+                    if(preg_match($parametro, $current_url, $matches, null, 0)){
+                        $this->_params_controller  = $matches;
+
+                    }
+                }
+
+                $this->instanceController($value);
+
+            }
+            //if( '/'.trim($this->current_url,'/') == '/'.trim($value,'/')){
 
                 /* Create an array for each pattern written in urls file */
 
-                $patter = $this->getCreateParams($value);
+                /*$patter = $this->getCreateParams($value);
                 /* verifica que el patro escrito en el urls file coincide con los parametros de la url */
-                if( $this->getMatchPatters($patter) ){
+                //if( $this->getMatchPatters($patter) ){
                     /* si la url coincide con el patron escrito en el archivo de url entonces se instancia el controlador */
-                    $this->instanceController($key);
-                    break;
-                }
-            }
+                //    $this->instanceController($key);
+                //    break;
+                //}
+            //}
         }
 
     }
-    private function getMatchPatters($patters){
-        /* cantidad de parametros del patron de url */
-        if (count($patters) != count($this->_params_url))
-            return false;
-
-        foreach ($patters as $key => $condicion){
-            /* se obtine el contenido de la url */
-            $value = $this->_params_url[$key];     
-
-            /* indice del array es 0 y no coincide el primer parametro de la url retorna 404 */
-            if($key == 0 && !preg_match('/^'.$condicion.'+$/i', $value)){
-                /*404*/
-                return false;
-
-            }
-
-            $parames_evaluated = trim(str_replace('}','', str_replace('P({','', $value)));
-
-
-            if(!preg_match('/^'.$parames_evaluated.'+$/i', $value)){
-                /*404*/
-                return false;
-            }
-
-            /* identificar si el patron es un parametro que debe ser enviado al controlador */
-            $p = "P{";
-            $posicion_coincidencia = strpos($condicion, $p);
-            if ($posicion_coincidencia !== false) {
-                $this->_params_controller[] = $value;
-            }
-        }
-
-        return true;
-    }
-
-    private function instanceController($indx){        
-        $controller = explode('.',$this->_controller[$indx]);
+    private function instanceController($controller){
+        $controller = explode('.',$controller);
 
         /* index 0 is application name */
         $application = $controller[0];
@@ -132,7 +105,6 @@ class Urls{
         }else{
             $method = '';
         }
-
         $namespace = 'apps\\' .$application .'\\controllers\\'.$class_controller;
 
         /*  validar que la aplicacion realmente este en el directorio correcto*/
@@ -209,22 +181,12 @@ class Urls{
 
 
     }
-    private function includeController($path){
-
-    }
-    /**
-     * @param array $controller
-     */
-    private function setController($controller)
-    {
-        $this->_controller[] = $controller;
-    }
 
     /**
      * @param array $url
      */
-    private function setUrl($url)
+    private function setUrl(Array $url)
     {
-        $this->_pattern[] = $url;
+        $this->_pattern = array_merge($this->_pattern, $url);
     }
 }
