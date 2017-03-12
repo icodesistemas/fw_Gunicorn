@@ -8,7 +8,7 @@ interface iModels{
 
     public function getData($field, $conditions, $limit = '', $groupBy = '', $having = '');
     public function setDelete($conditions);
-    public function setUpdate($conditions);
+    public function setUpdate(Array $value, Array $conditions);
     public function setExecQuery($sql);
     public function getLastInsertId();
     public function getAffectedRows();

@@ -11,11 +11,14 @@ class Login extends Session {
         $this->model = new User();
     }
     public function makeLogout(){
-        $id_session = Session::getDecrypt($_COOKIE['sessionid']);
+        $id_session = $_COOKIE['sessionid'];
         $this->destroy();
 
-        $sql = 'delete from fw_gunicorn_session where session_id = '.$id_session.' ';
+        $sql = "delete from fw_gunicorn_session where session_id = '".$id_session."' ";
         $this->model->DB()->exec($sql);
+
+        $redirec = trim(DOMAIN_NAME,'/') .'/'. trim(LOGIN_URL,'/');
+        header("Location: $redirec ");
 
     }
     public function makeLogin($user, $pass)

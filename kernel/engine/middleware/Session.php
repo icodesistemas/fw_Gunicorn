@@ -68,6 +68,7 @@ class Session{
 
     }
     public static function loginRequired($url_paramets){
+
         /* captura la url invocada en el browser */
         $basepath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
         $uri = substr($_SERVER['REQUEST_URI'], strlen($basepath));
@@ -86,6 +87,7 @@ class Session{
         $redirec = trim(DOMAIN_NAME,'/') .'/'. trim(LOGIN_URL,'/');
 
         /* si la cookie sessionid no existe entonces no existe el inicio de sesion */
+
         if(!isset($_COOKIE['sessionid'])){
             header("Location: $redirec ");
 

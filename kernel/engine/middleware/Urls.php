@@ -6,6 +6,7 @@ class Urls{
     private $_pattern = array();
     private $current_url = "/";
     private $_instanceMiddleware = array();
+    private $_params_controller = array();
 
     public function __construct(){
         /* captura la url invocada en el browser */
@@ -14,7 +15,7 @@ class Urls{
         if (strstr($uri, '?')) $uri = substr($uri, 0, strpos($uri, '?'));
         $uri = '/' . trim($uri, '/');
 
-        $this->current_url = $uri;
+        $this->current_url = trim($uri,'/');
 
 
 
@@ -24,13 +25,11 @@ class Urls{
      * @param null $controller
      */
     public function add($url, $controller = null, $instanceClass = null){
-        $this->setUrl(array($url => $controller));
-
+        $this->setUrl(array(trim($url,'/') => $controller));
 
         if(!empty($instanceClass))
-            $this->_instanceMiddleware = array_merge($this->_instanceMiddleware, array($url =>$instanceClass));
+            $this->_instanceMiddleware = array_merge($this->_instanceMiddleware, array(trim($url,'/') =>$instanceClass));
     }
-
     /**
      * Process the url request
      */
@@ -71,22 +70,9 @@ class Urls{
 
                     }
                 }
-
                 $this->instanceController($value);
 
             }
-            //if( '/'.trim($this->current_url,'/') == '/'.trim($value,'/')){
-
-                /* Create an array for each pattern written in urls file */
-
-                /*$patter = $this->getCreateParams($value);
-                /* verifica que el patro escrito en el urls file coincide con los parametros de la url */
-                //if( $this->getMatchPatters($patter) ){
-                    /* si la url coincide con el patron escrito en el archivo de url entonces se instancia el controlador */
-                //    $this->instanceController($key);
-                //    break;
-                //}
-            //}
         }
 
     }
@@ -111,6 +97,7 @@ class Urls{
         if(!file_exists(BASE_DIR . 'apps/' . $application)){
             die('La aplicación ' . $application . ' no se encuentra instalada');
         }
+
         $controller = new $namespace(BASE_DIR . 'apps/' . $application . '/');
         //$controller->setPathApplication('apps\\' .$application .'\\');
 
@@ -118,18 +105,34 @@ class Urls{
             return;
         }
         $instans_request = false;
-
+        $indx_instans = '';
         foreach ($this->_instanceMiddleware as $key => $value){
-            if($key == $this->current_url)
+            /* verificar si el patron de url definidor en el urls.php es el mismo que la url que se esta solicitando */
+            $current_url =  trim($this->current_url,'/');
+            $value_pattern = str_replace('/','\/',trim($key,'/'));
+
+            /* quitar la sintaxis de P{[]} para expresiones regulares */
+            $value_pattern = str_replace('P{','', $value_pattern);
+
+            $value_pattern = '/^'.trim(str_replace('}','', $value_pattern),'/');
+
+            /*evalua que la url que se esta pidiendo sea la que cumpla algun patron de url definido en el urls.php del proyecto */
+
+            if(preg_match($value_pattern.'$/', $current_url)){
                 $instans_request = true;
+                $indx_instans = $key;
+
+            }
+
         }
+
         if( count($this->_params_controller) > 0 ){
             /* hay que mejorar */
             switch ( count($this->_params_controller) ) {
                 case 1:
                     if($instans_request){
                         $controller->$method(
-                            $this->_instanceMiddleware[$this->current_url],
+                            $this->_instanceMiddleware[$indx_instans],
                             $this->_params_controller[0]);
                     }else{
                         $controller->$method($this->_params_controller[0]);
@@ -138,7 +141,7 @@ class Urls{
                 case 2:
                     if($instans_request){
                         $controller->$method(
-                            $this->_instanceMiddleware[$this->current_url],
+                            $this->_instanceMiddleware[$indx_instans],
                             $this->_params_controller[0],
                             $this->_params_controller[1]
                         );
@@ -165,16 +168,26 @@ class Urls{
 
                     break;
                 case 4:
-                    $controller->$method( $this->_params_controller[0],
-                        $this->_params_controller[1],
-                        $this->_params_controller[2],
-                        $this->_params_controller[3] );
+                    if($instans_request){
+                        $controller->$method(
+                            $this->_instanceMiddleware[$this->current_url],
+                            $this->_params_controller[0],
+                            $this->_params_controller[1],
+                            $this->_params_controller[2],
+                            $this->_params_controller[3] );
+                    }else{
+                        $controller->$method( $this->_params_controller[0],
+                            $this->_params_controller[1],
+                            $this->_params_controller[2],
+                            $this->_params_controller[3] );
+                    }
+
                     break;
             }
 
         }else{
             if($instans_request)
-                $controller->$method($this->_instanceMiddleware[$this->current_url]);
+                $controller->$method($this->_instanceMiddleware[trim($this->current_url,'/')]);
             else
                 $controller->$method();
         }
