@@ -43,10 +43,12 @@ class Request{
         $uri = substr($_SERVER['REQUEST_URI'], strlen($basepath));
         if (strstr($uri, '?')) $uri = substr($uri, 0, strpos($uri, '?'));
         $uri = '/' . trim($uri, '/');
-        if(in_array($uri, Request::$excepCSRFTOKEN)){
+
+
+        if(in_array(trim($uri, '/'), Request::$excepCSRFTOKEN)){
             return true;
         }
-        if(!isset($_REQUEST['csrftoken']) || $_REQUEST['csrftoken'] != $_COOKIE['csrftoken']){
+        if(!isset($_REQUEST['csrftoken']) || $_REQUEST['csrftoken'] != $_SESSION['csrftoken']){
             die('
                     <h1>forbidden 403</h1>
                     <p>CSRFTOKEN in '.$uri.'</p>
@@ -108,7 +110,7 @@ class Request{
             unset($_REQUEST[$key]);
         }
     }
-    public static function excepCSRFTOKEN($form){
-        self::$excepCSRFTOKEN[] = $form;
+    public static function excepCSRFTOKEN($url_exception){
+        self::$excepCSRFTOKEN[] = $url_exception;
     }
 }

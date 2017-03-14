@@ -66,6 +66,31 @@ class aModels implements iModels {
 
     }
     public function setDelete($conditions, $limit = ''){
+        $Query = "delete from $this->table ";
+        try{
+            if(is_array($conditions) > 0){
+                $where = " where ";
+                $val= "";
+                foreach ($conditions as $key => $value){
+                    $where .= " $key = ?,";
+                    $val .= " $value,";
+                }
+                $where = trim($where,',');
+                $val = trim($val,',');
+                $Query .= $where;
+
+                return $this->db->exec($Query, explode(',',$val));
+            }else{
+                if(!empty($conditions)){
+                    $Query .= " WHERE ".$conditions;
+                }
+                return $this->db->exec($Query);
+            }
+
+
+        }catch (\PDOException $e){
+            die($e->getMessage());
+        }
 
     }
 

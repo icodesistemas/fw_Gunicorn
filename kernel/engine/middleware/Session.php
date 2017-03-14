@@ -1,5 +1,4 @@
 <?php
-
 namespace fw_Gunicorn\kernel\engine\middleware;
 
 use fw_Gunicorn\kernel\engine\dataBase\ConexionDataBase;
@@ -12,7 +11,7 @@ class Session{
         else
             $expire_sesion = time()+ 60*24;
 
-        $id_session = $this->setCookies('sessionid', $this->getGenerateSecretKey(), $expire_sesion);
+        $id_session = $this->setSession('sessionid', $this->getGenerateSecretKey());
 
         $fullname = $this->getEncrypt($data['nom_user']);
         $email = $this->getEncrypt($data['email_user']);
@@ -28,20 +27,13 @@ class Session{
         $DB->qqInsert('fw_gunicorn_session', $data);
         return true;
     }
-    public function setCookies($id, $value, $expire_session = null){
-        
-        if(isset($_COOKIE[$id]))
+    public function setSession($id, $value, $expire_session = null){
+        if(isset($_SESSION[$id]))
             return;
-
-        if(empty($expire_session)){
-            $expire_session = time()+ 60*24;
-            if(defined('SESSION_COOKIE_AGE'))
-                $expire_session = time()+ intval(SESSION_COOKIE_AGE);
-        }
 
         $value = md5($this->getGenerateSecretKey($value));
 
-        setcookie($id, $value, $expire_session);
+        $_SESSION[$id] = $value;
         return $value;
     }
     public static function getDecrypt($clave){
@@ -88,7 +80,7 @@ class Session{
 
         /* si la cookie sessionid no existe entonces no existe el inicio de sesion */
 
-        if(!isset($_COOKIE['sessionid'])){
+        if(!isset($_SESSION['sessionid'])){
             header("Location: $redirec ");
 
         }
@@ -103,12 +95,12 @@ class Session{
      * Returns true if there is an active session, Otherwise it will return false
      */
     public function checkSessionActive(){
-        if(!isset($_COOKIE['sessionid'])){
+        if(!isset($_SESSION['sessionid'])){
             return;
         }
         $sql = 'select expire_date from fw_gunicorn_session where session_id = ?';
         $db = new ConexionDataBase();
-        $expire = $db->getValue($sql, array($_COOKIE['sessionid']));
+        $expire = $db->getValue($sql, array($_SESSION['sessionid']));
         $date_current = date('Y-m-d H:i:s');
 
         /* borro las sessiones caducadas */
@@ -128,20 +120,16 @@ class Session{
         else
             $expire_sesion = time()+ 60*24;
 
-        $expire = date('Y-m-d H:i:s',$expire_sesion);
-        $sql = "update fw_gunicorn_session set expire_date = '".$expire."' where session_id = '".$_COOKIE['sessionid']."' ";
+        $expire = date('Y-m-d H:i:s', $expire_sesion);
+        $sql = "update fw_gunicorn_session set expire_date = '".$expire."' where session_id = '".$_SESSION['sessionid']."' ";
         $db->exec($sql);
-
-        //setcookie('sessionid', $_COOKIE['sessionid'], $expire_sesion);
-    }
-    private function expireSession(){
 
     }
     public function destroy(){
-        foreach ($_COOKIE as $key => $value){
-            unset($_COOKIE[$key]);
-            setcookie($key, '');
+        foreach ($_SESSION as $key => $value){
+            if($key != 'csrftoken'){
+                unset($_SESSION[$key]);
+            }
         }
-
     }
 }

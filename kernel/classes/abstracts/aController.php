@@ -2,6 +2,7 @@
 namespace fw_Gunicorn\kernel\classes\abstracts;
 
 use fw_Gunicorn\kernel\engine\dataBase;
+use fw_Gunicorn\kernel\engine\middleware\Response;
 use Twig_Loader_Filesystem;
 use Twig_Environment;
 
@@ -28,6 +29,23 @@ abstract class aController{
         }
         return $this->db;
     }
+    private function addContextToken($context){
+        /* si la cookie de token esta definida la agrega al contexto del template para que pueda ser usada en el template */
+        if(isset($_SESSION['csrftoken'])){
+            if(!empty($context))
+                $context = array_merge($context,array('csrftoken' => $_SESSION['csrftoken'])) ;
+            else
+                $context = array('csrftoken' => $_SESSION['csrftoken']);
+        }
+        return $context;
+    }
+    private function addContextMessage($context){
+        /* verifica si hay algun mensaje que enviar al template lo agrega al template */
+        if(!empty(Response::getMessage()))
+            $context = array_merge($context, array('message' => Response::getMessage())) ;
+
+        return $context;
+    }
     public function render($template, $context = null){
         /* se identifica el nombre del dominio de la aplicacion web */
         if(!defined('DOMAIN_NAME') ||  empty(DOMAIN_NAME)){
@@ -40,12 +58,8 @@ abstract class aController{
 
         $twig = new Twig_Environment($this->loader_template);
 
-        if(isset($_COOKIE['csrftoken'])){
-            if(!empty($context))
-                $context = array_merge($context,array('csrftoken' => $_COOKIE['csrftoken'])) ;
-            else
-                $context = array('csrftoken' => $_COOKIE['csrftoken']);
-        }
+        $context = $this->addContextToken($context);
+        $context = $this->addContextMessage($context);
 
         if(!empty($context)){
             $tpl = $twig->render($template.'.twig', $context);
