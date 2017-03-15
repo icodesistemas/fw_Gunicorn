@@ -64,10 +64,14 @@ class Request{
             return false;
     }
     public function _post($key){
-        return Request::$post[$key];
+        if(isset(Request::$post[$key]))
+            return Request::$post[$key];
+        else
+            return null;
 
     }
     public function _postAll(){
+
         return Request::$post;
 
     }
@@ -83,7 +87,10 @@ class Request{
 
     }
     public function _files($key){
-        return Request::$files[$key];
+        if(isset(Request::$files[$key]))
+            return Request::$files[$key];
+        else
+            return null;
 
     }
     public function _filesAll(){
