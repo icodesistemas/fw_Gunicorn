@@ -151,10 +151,13 @@ class ConexionDataBase extends PDO {
         $arrayValue= "";
         $i = 1;
         $pkfield = '';
+
         foreach ($table_data as $key => $val) {
-            if($key == 'PK'){
+            if($key == 'PK' ){
                 $pkfield = $val[0];
             }
+            if(!empty($this->fieldPK ))
+                $pkfield = $this->fieldPK ;
             if(count($table_data) > $i){
                 if($i == 1){
                     $value .= "?";
@@ -239,11 +242,11 @@ class ConexionDataBase extends PDO {
 
         $rsCol = $this->getArray($rsCol->queryString);
 
-
-
         foreach ($rsCol as $i => $row) {
             if($this->driver == 'pgsql'){
                 $string = $row['key'];
+
+
                 if(preg_match("/pkey/", $string) || preg_match("/pk/", $string) || preg_match("/PRI/", $string) ){
                     $COL = array_merge($COL, array("PK" => array($row['field'],$row['type'])));
                 }else{
@@ -265,18 +268,19 @@ class ConexionDataBase extends PDO {
     private function pairsColumnWithData($data,$table){
 
         if(!$table) {
-            throw new Exception("No se puede verificar los campos por que tabla no esta configurada");
+            throw new \Exception("No se puede verificar los campos por que tabla no esta configurada");
             return false;
         }
         if(!is_array($data)) {
-            throw new Exception("La variable data debe ser una matriz asociativa");
+            throw new \Exception("La variable data debe ser una matriz asociativa");
             return false;
         }
         $structTable = $this->getFields($table);
 
         $arrayAssocc = array();
 
-        /* checar si los campos pasados en el array $data existen en la estructura de la tabla y si existen asociar a esos campos su valor correspondiente */
+        /* checar si los campos pasados en el array $data existen en la estructura de la tabla y si existen asociar a
+        esos campos su valor correspondiente */
         foreach ($structTable as $i => $val) {
             if($i == "PK"){
                 $this->fieldPK = $val[0];

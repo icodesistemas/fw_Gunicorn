@@ -57,7 +57,7 @@ class aModels implements iModels {
     }
     public function setAdd(Array $value, $redirect=''){
         try{
-            $this->db->qqInsert($this->table, $value);
+            return $this->db->qqInsert($this->table, $value);
 
 
         }catch (\PDOException $e){
