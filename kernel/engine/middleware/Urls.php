@@ -38,13 +38,6 @@ class Urls{
         print_r($this->_pattern);
         die();*/
         foreach ($this->_pattern as $key => $value){
-            /*if($value == ''){
-
-                if(preg_match("#^/$value$#", $this->current_url)){
-                    $this->instanceController($key);
-                    break;
-                }
-            }*/
             /* verificar si el patron de url definidor en el urls.php es el mismo que la url que se esta solicitando */
             $current_url =  trim($this->current_url,'/');
             $value_pattern = str_replace('/','\/',trim($key,'/'));

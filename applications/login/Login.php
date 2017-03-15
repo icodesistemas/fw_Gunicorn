@@ -11,7 +11,7 @@ class Login extends Session {
         $this->model = new User();
     }
     public function makeLogout(){
-        $id_session = $_COOKIE['sessionid'];
+        $id_session = $_SESSION['sessionid'];
         $this->destroy();
 
         $sql = "delete from fw_gunicorn_session where session_id = '".$id_session."' ";
