@@ -18,7 +18,7 @@ function FieldString($name_field, $max_length, $notNull, $default = ''){
             $campo .= " character varying ($max_length) ";
             break;
         case 'mysql':
-            $campo .= ' varchar ($max_length)';
+            $campo .= " varchar ($max_length)";
             break;
         case 'sqlite':
             $campo .= ' text';
@@ -203,7 +203,7 @@ function FieldDateTime($name_field, $notNull, $default = ''){
         $campo .= " NOT NULL ";
 
     if(!empty($default))
-        $campo .= " DEFAULT '$default' ";
+        $campo .= " DEFAULT $default ";
 
 
     return $campo;
@@ -221,7 +221,7 @@ function FieldAutoField($name_field){
             $campo .= ' serial';
             break;
         case 'mysql':
-            $campo .= ' AUTO_INCREMENT';
+            $campo .= ' BIGINT NOT NULL AUTO_INCREMENT ';
             break;
         case 'sqlite':
             $campo .= ' AUTO INCREMENT';
@@ -235,7 +235,26 @@ function FieldAutoField($name_field){
     return $campo;
 }
 function DateTimeNow(){
-    return 'now()';
+    if(defined('DATABASE')){
+        $database = unserialize(DATABASE);
+        $sgdb = $database['ENGINE'];
+    }
+    switch ($sgdb){
+        case 'pgsql':
+            return 'now()';
+            break;
+        case 'mysql':
+            return "current_timestamp";
+            break;
+        case 'sqlite':
+            //$campo .= ' AUTO INCREMENT';
+            break;
+        default:
+            die('Error, database engine is not defined');
+            break;
+    }
+
+
 }
 function getNamerandom(){
     $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"; //posibles caracteres a usar
