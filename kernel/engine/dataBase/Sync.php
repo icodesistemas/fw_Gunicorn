@@ -14,58 +14,65 @@ function getClassModel(){
 
     /* ejecuta el CREATE TABLE */
     while(($file = readdir($dh)) !== false){
-        $reader = fopen($path_folder_models . '/' . $file, 'r');
-        while(!feof($reader)) {
-            $linea = fgets($reader);
+        if(is_file($path_folder_models . '/' . $file)){
+            $reader = fopen($path_folder_models . '/' . $file, 'r');
 
-            if(preg_match("/class /", $linea)){
-                $var = str_replace(' extends aModels {','',$linea);
-                $var = str_replace(' extends aModels{','',$var);
+            while(!feof($reader)) {
+                $linea = fgets($reader);
+                if(preg_match("/class /", $linea)){
+                    $var = str_replace(' extends aModels {','',$linea);
+                    $var = str_replace(' extends aModels{','',$var);
 
-                $var = str_replace(' implements iMigrate {','',$linea);
-                $var = str_replace(' implements iMigrate{','',$var);
+                    $var = str_replace(' implements iMigrate {','',$linea);
+                    $var = str_replace(' implements iMigrate{','',$var);
 
-                $var = str_replace('class ','',$var);
+                    $var = str_replace('class ','',$var);
 
-                $var = trim(str_replace('extends aModels','',$var));
+                    $var = trim(str_replace('extends aModels','',$var));
 
-                $class = $namespaces . $var;
-                $obj = new $class;
-                $obj->__init__();
-                CreateTable::_create($obj);
-                //$obj->__foreignKey();
+                    $class = $namespaces . $var;
+                    $obj = new $class;
+                    $obj->__init__();
+                    CreateTable::_create($obj);
+                    //$obj->__foreignKey();
+
+                }
 
             }
-
+            fclose($reader);
         }
-        fclose($reader);
+        
     }
+    
     /* ejecuta el ALTER TABLE para los foren*/
     $dh2 = opendir($path_folder_models);
     while(($file2 = readdir($dh2)) !== false){
-        $reader = fopen($path_folder_models . '/' . $file2, 'r');
-        while(!feof($reader)) {
-            $linea = fgets($reader);
+        if(is_file($path_folder_models . '/' . $file2)){
+            $reader = fopen($path_folder_models . '/' . $file2, 'r');
+            while(!feof($reader)) {
+                $linea = fgets($reader);
 
-            if(preg_match("/class /", $linea)){
-                $var = str_replace(' extends aModels {','',$linea);
-                $var = str_replace(' extends aModels{','',$var);
+                if(preg_match("/class /", $linea)){
+                    $var = str_replace(' extends aModels {','',$linea);
+                    $var = str_replace(' extends aModels{','',$var);
 
-                $var = str_replace(' implements iMigrate {','',$linea);
-                $var = str_replace(' implements iMigrate{','',$var);
+                    $var = str_replace(' implements iMigrate {','',$linea);
+                    $var = str_replace(' implements iMigrate{','',$var);
 
-                $var = str_replace('class ','',$var);
+                    $var = str_replace('class ','',$var);
 
-                $var = trim(str_replace('extends aModels','',$var));
+                    $var = trim(str_replace('extends aModels','',$var));
 
-                $class = $namespaces . $var;
-                $obj = new $class;
-                $obj->__foreignKey();
+                    $class = $namespaces . $var;
+                    $obj = new $class;
+                    $obj->__foreignKey();
+
+                }
 
             }
-
+            fclose($reader);
         }
-        fclose($reader);
+        
     }
 
 
