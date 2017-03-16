@@ -168,7 +168,7 @@ function FieldChar($name_field, $notNull, $default = ''){
     return $campo;
 }
 function FieldDate($name_field, $notNull, $default = ''){
-    $campo = $name_field.' date';
+    $campo = $name_field.' date ';
 
     if ($notNull)
         $campo .= " NOT NULL ";
@@ -218,7 +218,7 @@ function FieldAutoField($name_field){
     }
     switch ($sgdb){
         case 'pgsql':
-            $campo .= ' bigserial';
+            $campo .= ' serial';
             break;
         case 'mysql':
             $campo .= ' AUTO_INCREMENT';
