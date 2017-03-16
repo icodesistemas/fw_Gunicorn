@@ -49,7 +49,7 @@ class ConexionDataBase extends PDO {
                 $this->setSchema($params['SHEMA'], $driver);
             }
             $this->driver = $driver;
-        }catch(PDOException $e){
+        }catch(\PDOException $e){
             die($e->getMessage());
         }
     }
