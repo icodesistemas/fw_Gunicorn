@@ -223,7 +223,7 @@ class ConexionDataBase extends PDO {
                 /*$sql = "select a.column_name as field,data_type as type, constraint_name as key
                         from information_schema.columns a left JOIN information_schema.key_column_usage b on a.COLUMN_NAME = b.column_name
                         where a.table_name = '".$table."'";*/
-                $sql = "select a.column_name as Field,data_type as Type, constraint_name  as Key
+                $sql = "select a.column_name as Field, data_type as Type, constraint_name  as Key
 						from information_schema.columns a LEFT JOIN information_schema.key_column_usage b on a.table_name = b.table_name and a.column_name = b.column_name
 						where a.table_name = '".$table."'";
                 break;
@@ -243,23 +243,13 @@ class ConexionDataBase extends PDO {
         $rsCol = $this->getArray($rsCol->queryString);
 
         foreach ($rsCol as $i => $row) {
-            if($this->driver == 'pgsql'){
-                $string = $row['key'];
-
-
-                if(preg_match("/pkey/", $string) || preg_match("/pk/", $string) || preg_match("/PRI/", $string) ){
-                    $COL = array_merge($COL, array("PK" => array($row['field'],$row['type'])));
-                }else{
-                    $COL = array_merge($COL, array("Field_".$i => array($row['field'],$row['type'])));
-                }
-            }elseif($this->driver == 'mysql'){
-
-            }elseif($this->driver == 'sqlite'){
-                if(preg_match('/1/', $row['pk']))
-                    $COL = array_merge($COL, array("PK" => array($row['name'],$row['type'])));
-                else
-                    $COL = array_merge($COL, array("Field_".$i => array($row['name'],$row['type'])));
+            $string = $row['Key'];
+            if(preg_match("/pkey/", $string) || preg_match("/pk/", $string) || preg_match("/PRI/", $string) ){
+                $COL = array_merge($COL, array("PK" => array($row['Field'],$row['Type'])));
+            }else{
+                $COL = array_merge($COL, array("Field_".$i => array($row['Field'],$row['Type'])));
             }
+
 
         }
         return $COL;
