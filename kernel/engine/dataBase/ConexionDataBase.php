@@ -243,11 +243,27 @@ class ConexionDataBase extends PDO {
         $rsCol = $this->getArray($rsCol->queryString);
 
         foreach ($rsCol as $i => $row) {
-            $string = $row['Key'];
+            if(isset($row['Key']))
+                $key = $row['Key'];
+            else
+                $key = $row['key'];
+
+            if(isset($row['Type']))
+                $type = $row['Type'];
+            else
+                $type = $row['type'];
+
+            if(isset($row['Field']))
+                $field = $row['Field'];
+            else
+                $field = $row['field'];
+
+
+            $string = $key;
             if(preg_match("/pkey/", $string) || preg_match("/pk/", $string) || preg_match("/PRI/", $string) ){
-                $COL = array_merge($COL, array("PK" => array($row['Field'],$row['Type'])));
+                $COL = array_merge($COL, array("PK" => array($field, $type)));
             }else{
-                $COL = array_merge($COL, array("Field_".$i => array($row['Field'],$row['Type'])));
+                $COL = array_merge($COL, array("Field_".$i => array($field, $type)));
             }
 
 
