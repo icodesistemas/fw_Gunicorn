@@ -50,22 +50,20 @@
                 $this->mailer->addReplyTo();
         }
         public function send(Array $Address, $subject, $message, Array $cc = array()){
-            try{
-                foreach ($Address as $key => $value){
-                    $this->mailer->addAddress(trim($key), trim($value));
-                    $this->mailer->Subject = $subject;
-                    $this->mailer->msgHTML($message);
 
-                    if (!$this->mailer->send()) {
-                        echo "Mailer Error: " . $this->mailer->ErrorInfo;
-                    } else {
-                        $this->mailer->clearAllRecipients();
-                        $this->mailer->clearAddresses();
-                    }
+            foreach ($Address as $key => $value){
+                $this->mailer->addAddress(trim($key), trim($value));
+                $this->mailer->Subject = $subject;
+                $this->mailer->msgHTML($message);
+
+                if (!$this->mailer->send()) {
+                    echo "Mailer Error: " . $this->mailer->ErrorInfo;
+                } else {
+                    $this->mailer->clearAllRecipients();
+                    $this->mailer->clearAddresses();
                 }
-            }catch (\Exception $e){
-                die($e->getMessage());
             }
+
 
         }
     }
