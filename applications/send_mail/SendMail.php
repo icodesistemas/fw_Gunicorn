@@ -1,4 +1,8 @@
 <?php
+/**
+ * Este aplicativo se encarga de conextarse con un servidor SMTP para el envio de correo electronico
+ * Esta basando en la conocida libreria phpmailer.
+ */
     namespace fw_Gunicorn\applications\send_mail;
 
 
@@ -11,7 +15,7 @@
             if(!defined('SERVER_SMTP') || !defined('USER_SMTP') || !defined('PASS_SMTP') || !defined('PORT_SMTP') ||
                 !defined('TYPE_SECURE_SMTP')){
                 die('To use the application of sending electronic mail must define the following constants in the file 
-                settings.php: SERVER_SMTP, PORT_SMTP, TYPE_SECURE_SMTP, USER_SMTP, PASS_SMTP');
+                settings.php: SERVER_SMTP, PORT_SMTP, TYPE_SECURE_SMTP, USER_SMTP_FROM_NAME, USER_SMTP, PASS_SMTP');
             }
 
             $this->mailer = new PHPMailer();
@@ -39,21 +43,29 @@
 
             $this->mailer->Password = PASS_SMTP;
 
+            $this->mailer->From = USER_SMTP;
+            $this->mailer->FromName = USER_SMTP_FROM_NAME;
+
             if(defined('REPLY_TO'))
                 $this->mailer->addReplyTo();
         }
         public function send(Array $Address, $subject, $message, Array $cc = array()){
-            foreach ($Address as $value){
-                $this->mailer->addAddress($value[0], $value[1]);
-                $this->mailer->Subject = $subject;
-                $this->mailer->msgHTML($message);
+            try{
+                foreach ($Address as $key => $value){
+                    $this->mailer->addAddress(trim($key), trim($value));
+                    $this->mailer->Subject = $subject;
+                    $this->mailer->msgHTML($message);
 
-                if (!$this->mailer->send()) {
-                    echo "Mailer Error: " . $this->mailer->ErrorInfo;
-                } else {
-                    $this->mailer->clearAllRecipients();
-                    $this->mailer->clearAddresses();
+                    if (!$this->mailer->send()) {
+                        echo "Mailer Error: " . $this->mailer->ErrorInfo;
+                    } else {
+                        $this->mailer->clearAllRecipients();
+                        $this->mailer->clearAddresses();
+                    }
                 }
+            }catch (\Exception $e){
+                die($e->getMessage());
             }
+
         }
     }
