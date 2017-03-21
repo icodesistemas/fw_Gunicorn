@@ -1,11 +1,24 @@
 <?php
+
+/**
+ * @author abejarano
+ * @version 0.1 
+ * Session, es la clase se encarga de gestionar el registro de sessiones en el sistema basado en un back end de
+ * base de datos.
+ */
+
 namespace fw_Gunicorn\kernel\engine\middleware;
 
 use fw_Gunicorn\kernel\engine\dataBase\ConexionDataBase;
 
 class Session{
 
-    public function registerSession($data, $DB){
+    /**
+     * @param  Array data contiene todo el contenido que se desea guardar en la session
+     * @param  $DB 
+     * @return [type]
+     */
+    public function registerSession(Array $data, $DB){
         if(defined('SESSION_COOKIE_AGE'))
             $expire_sesion = time()+ intval(SESSION_COOKIE_AGE);
         else
@@ -24,10 +37,21 @@ class Session{
             'session_data' => serialize([$fullname, $email, $username]),
             'expire_date' => date('Y-m-d H:i:s',$expire_sesion)
         );
-        $DB->qqInsert('fw_gunicorn_session', $data);
-        return true;
+        try{
+            $DB->qqInsert('fw_gunicorn_session', $data);
+            return true;
+        }catch(\PDOException $e){
+            return false;
+        }
+        
+        
     }
-    public function setSession($id, $value, $expire_session = null){
+
+    /**
+     * @param $id clave de la session
+     * @param $value valor de la clave     
+     */
+    public function setSession($id, $value){
         if(isset($_SESSION[$id]))
             return;
 
@@ -36,16 +60,29 @@ class Session{
         $_SESSION[$id] = $value;
         return $value;
     }
+    /**
+     * @param  $clave es la frase que se desea descifrar
+     * @return una frase descifrada
+     */
     public static function getDecrypt($clave){
         $semilla = "4e15cb955dbfb0e4180f97e936be3419";
         return str_rot13(str_replace(($semilla), "", base64_decode(str_rot13(base64_decode($clave)))));
 
     }
+    /**
+     * @param  $clave es la frase que se desea cifrar
+     * @return una frase cifrada que permite posteriormente ser descifrada
+     */
     public function getEncrypt($clave){
         $semilla = "4e15cb955dbfb0e4180f97e936be3419";
         return base64_encode(str_rot13(base64_encode(str_rot13($clave).($semilla))));
 
     }
+    /**
+     * Genera llaves secretas usadas para los parametros de session de php.
+     * @param  $cadena es un string que por default está vacio si no está vacio será la cadena que se cifrará
+     * @return una llave cifrada.
+     */
     public function getGenerateSecretKey($cadena = ""){
         $caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
         $numerodeletras=10;
@@ -59,6 +96,10 @@ class Session{
         return hash('sha256',md5(sha1($cadena). sha1($semilla)));
 
     }
+    /**
+     * @param  $url_paramets es la url que será varificada que si tiene un sesion iniciada entonces la permitirá.
+     * @return retorna la url en cuetion para su posterior utilización.
+     */
     public static function loginRequired($url_paramets){
 
         /* captura la url invocada en el browser */
@@ -84,14 +125,10 @@ class Session{
             header("Location: $redirec ");
 
         }
-        /* se verifica que la sesion no haya cadudado */
-        /*if(Session::expireSession()){
-            header("Location: $redirec ");
-        }*/
+       
         return $url_paramets;
     }
     /**
-     * @return bool
      * Returns true if there is an active session, Otherwise it will return false
      */
     public function checkSessionActive(){
@@ -114,6 +151,10 @@ class Session{
         }
         $this->renovateSession($db);
     }
+    /**
+     * renovateSession refrezca la fecha hora minuto y segundo en que caducará la session
+     * @param  $db conexion a la base de datos     
+     */
     private function renovateSession($db){
         if(defined('SESSION_COOKIE_AGE'))
             $expire_sesion = time()+ intval(SESSION_COOKIE_AGE);
