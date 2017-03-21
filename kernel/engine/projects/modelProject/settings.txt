@@ -24,7 +24,7 @@ define('SESSION_COOKIE_AGE', 86400);
 
 /* applications install */
 define('APP_INSTALL',serialize([
-    'fw_Gunicorn.engine.applications.login'
+    'fw_Gunicorn.applications.login'
 ]));
 
 /* parameters for connecting the database */
