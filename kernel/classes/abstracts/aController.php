@@ -7,17 +7,17 @@ use Twig_Loader_Filesystem;
 use Twig_Environment;
 
 abstract class aController{
-    
-    #private $path_app;
+
     private $db;
     private $dir_template;
 
 
     public function __construct($app){
         $this->setStartEngineTemplate($app);
-        if(defined ('DATABASE')){
+        /* negar que el controlador se conecte a la db
+         * if(defined ('DATABASE')){
             $this->db = new dataBase\ConexionDataBase();
-        }
+        }*/
 
     }
     /**
