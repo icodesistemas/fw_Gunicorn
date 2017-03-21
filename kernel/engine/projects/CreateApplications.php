@@ -29,6 +29,9 @@
             /* create folder for the application controllers*/
             mkdir($folder_new_app . '/controllers',0755);
 
+            /* create folder for the application models*/
+            mkdir($folder_new_app . '/models',0755);
+
             $this->setCreateControllers($folder_new_app . '/controllers');
         }
 
