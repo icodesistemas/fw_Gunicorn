@@ -6,28 +6,42 @@ namespace fw_Gunicorn\applications\login\models;
 use fw_Gunicorn\kernel\classes\abstracts\aModels;
 use fw_Gunicorn\kernel\classes\interfaces\iMigrate;
 use fw_Gunicorn\kernel\engine\dataBase\CreateTable;
+use fw_Gunicorn\kernel\engine\dataBase\DataType;
 use fw_Gunicorn\kernel\engine\dataBase\TypeFields;
 
 
-class Session extends aModels implements iMigrate {
+class Session extends aModels{
+
+    /**
+     * Session constructor.
+     */
     public function __construct(){
         parent::__construct('fw_gunicorn_user');
     }
 
-    public function __init__(){
-        CreateTable::_new('fw_gunicorn_session',[
-            TypeFields\FieldString('session_id',200, true),
-            TypeFields\FieldText('session_data',true),
-            TypeFields\FieldDateTime('expire_date',true),
-            TypeFields\FieldChar('status', true, 'A')
-        ]);
-        CreateTable::_primaryKey('session_id');
-        CreateTable::_unique(array(
-            'expire_date'
-        ));
+    protected function __fields__()
+    {
+        $field = [
+            'session_id' => DataType::FieldString(200, true),
+            'session_data' => DataType::FieldText(true),
+            'expire_date' => DataType::FieldDateTime(true),
+            'status' => DataType::FieldChar(true, 'A')
+        ];
+        return $field;
     }
 
-    public function __foreignKey()
+    protected function __setPrimary()
+    {
+        $pk = ['session_id'];
+        return $pk;
+    }
+
+    protected function __setUnique()
+    {
+        // TODO: Implement __setUnique() method.
+    }
+
+    protected function __foreignKey()
     {
         // TODO: Implement __foreignKey() method.
     }
