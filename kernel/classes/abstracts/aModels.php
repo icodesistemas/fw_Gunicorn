@@ -4,140 +4,32 @@ namespace fw_Gunicorn\kernel\classes\abstracts;
 use fw_Gunicorn\kernel\classes\interfaces\iModels;
 use fw_Gunicorn\kernel\engine\dataBase\ConexionDataBase;
 
-class aModels implements iModels {
+abstract class aModels {
     private $db;
     private $table;
-    private static  $fields = array();
-    public function __construct($table)
+
+    abstract protected function __fields__();
+    abstract protected function __setPrimary();
+    abstract protected function __setUnique();
+    abstract protected function __foreignKey();
+
+    public function __construct($model_name)
     {
-        if(!defined('DATABASE'))
+        /*if(!defined('DATABASE'))
             die('Please submit the login credentials to the database');
 
-        $this->db = new ConexionDataBase();
-        $this->setTable($table);
+        $this->db = new ConexionDataBase();*/
+        $this->setTable($model_name);
+
+        $this->model = $this->__fields__();
+        $this->uniq = $this->__setUnique();
+        $this->pk = $this->__setPrimary();
+        $this->fk = $this->__foreignKey();
+
     }
-    public function DB(){
-        return $this->db;
-    }
+
     private function setTable($table){
         $this->table = $table;
-    }
-    private function getCondition($conditions){
-        $where = array();
-        foreach ($conditions as $key => $val){
-            $where[] =array($key => $val);
-        }
-        return $where;
-    }
-    public function getData($fields, $conditions = '', $limit = '', $groupBy = '', $having = '')
-    {
-        $Query = "select  $fields
-                  from $this->table ";
-        if(!empty($conditions) && is_string($conditions)){
-            $Query .= "where ".$conditions;
-            $data = $this->db->getArray($Query);
-        }elseif(is_array($conditions)){
-            $where = " where ";
-            $val= "";
-            foreach ($conditions as $key => $value){
-                $where .= " $key = ?,";
-                $val .= " $value,";
-            }
-            $where = trim($where,',');
-            $val = trim($val,',');
-            $Query .= $where;
-
-            $data = $this->db->getArray($Query, explode(',',$val));
-        }
-        if(count($data) == 1){
-            return $data[0];
-        }else{
-            return $data;
-        }
-    }
-    public function setAdd(Array $value, $redirect=''){
-        try{
-            return $this->db->qqInsert($this->table, $value);
-
-
-        }catch (\PDOException $e){
-            die($e->getMessage());
-        }
-
-    }
-    public function setDelete($conditions, $limit = ''){
-        $Query = "delete from $this->table ";
-        try{
-            if(is_array($conditions) > 0){
-                $where = " where ";
-                $val= "";
-                foreach ($conditions as $key => $value){
-                    $where .= " $key = ?,";
-                    $val .= " $value,";
-                }
-                $where = trim($where,',');
-                $val = trim($val,',');
-                $Query .= $where;
-
-                return $this->db->exec($Query, explode(',',$val));
-            }else{
-                if(!empty($conditions)){
-                    $Query .= " WHERE ".$conditions;
-                }
-                return $this->db->exec($Query);
-            }
-
-
-        }catch (\PDOException $e){
-            die($e->getMessage());
-        }
-
-    }
-
-    public function setUpdate(Array $value, Array $conditions){
-        $sql = "UPDATE  $this->table set ";
-
-        /* recorremos los value para crear una consulta preparada */
-        $array_value = array();
-        foreach ($value as $key => $val){
-            $sql .= " $key = ?,";
-            $array_value[] = $val;
-        }
-
-
-        /* ahora recorremos $condicion */
-        $sql = trim($sql,',') . " WHERE ";
-        foreach ($conditions as $key => $val){
-            $sql .= " $key = ?,";
-            $array_value[] = $val;
-        }
-        $sql = trim($sql,',');
-
-        try{
-            $this->DB()->exec($sql, $array_value);
-
-        }catch (\PDOException $e){
-            die($e->getMessage());
-        }
-    }
-
-    public function setExecQuery($sql)
-    {
-        // TODO: Implement setExecQuery() method.
-    }
-
-    public function getLastInsertId()
-    {
-        // TODO: Implement getLastInsertId() method.
-    }
-
-    public function getAffectedRows()
-    {
-        // TODO: Implement getAffectedRows() method.
-    }
-
-    public static function setFields($field, $required){
-        self::$fields[] = array($field => $required);
     }
 
 }
