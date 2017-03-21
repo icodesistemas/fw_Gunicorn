@@ -8,6 +8,7 @@ use Twig_Environment;
 
 abstract class aController{
 
+    #private $path_app;
     private $db;
     private $dir_template;
 
@@ -23,12 +24,12 @@ abstract class aController{
     /**
     * Return Object DataBase
     */
-    public function DB(){
+    /*public function DB(){
         if(!defined ('DATABASE')){
             die('The connection to database is not defined');
         }
         return $this->db;
-    }
+    }*/
     private function addContextToken($context){
         /* si la cookie de token esta definida la agrega al contexto del template para que pueda ser usada en el template */
         if(isset($_SESSION['csrftoken'])){
