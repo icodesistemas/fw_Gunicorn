@@ -7,11 +7,12 @@
  */
 namespace fw_Gunicorn\kernel\engine\dataBase;
 
+use fw_Gunicorn\kernel\classes\abstracts\aModels;
 use PDO;
 
 abstract class DataBase extends PDO
 {
-    protected $where = array();
+    protected $_where = "";
 
     abstract protected function __getNameModel();
     abstract protected function __getFieldsModel();
@@ -78,9 +79,31 @@ abstract class DataBase extends PDO
         }
     }
 
+    /**
+     * Crea una consulta a la db
+     * @param string $field campos que retornara la consulta.
+     * @return array Arrray con el resultado de la consulta.
+     */
     public function find($field = ""){
-        return 'datos';
+        $SELECT = "select ";
+        if(!empty($field))
+            $this->checkFieldExistsModel($field);
+        else
+            $field = $this->__getFieldsModel();
+
+        $SELECT .= $field . ' from ' . $this->__getNameModel() .' '. $this->_where;
+
+        echo $SELECT;
+
+        return array();
         #echo $this->__getNameModel();
 
+    }
+    private function checkFieldExistsModel($field){
+        $array_field = explode(',', $field);
+        foreach ($array_field as $value){
+            aModels::findFieldModel($value);
+        }
+        return true;
     }
 }
