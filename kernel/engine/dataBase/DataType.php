@@ -61,13 +61,13 @@ class DataType
         $campo = '';
         switch ($sgdb){
             case 'pgsql':
-                $campo .= ' bigint';
+                $campo .= ' BIGINT';
                 break;
             case 'mysql':
-                $campo .= ' bigint';
+                $campo .= ' BIGINT';
                 break;
             case 'sqlite':
-                $campo .= ' integer';
+                $campo .= ' INTEGER';
                 break;
             default:
                 die('Error, database engine is not defined');
@@ -92,7 +92,7 @@ class DataType
         $campo = '';
         switch ($sgdb){
             case 'pgsql':
-                $campo .= " numeric($max_digits, $decimal_places)";
+                $campo .= " NUMERIC($max_digits, $decimal_places)";
                 break;
             case 'mysql':
                 $campo .= " DECIMAL($max_digits, $decimal_places)";
@@ -127,7 +127,7 @@ class DataType
                 $type = ' bool';
                 break;
             case 'sqlite':
-                $type = ' integer';
+                $type = ' INTEGER';
                 break;
             default:
                 die('Error, database engine is not defined');
@@ -154,7 +154,7 @@ class DataType
                 $campo .= ' "char"';
                 break;
             case 'mysql':
-                $campo .= ' char';
+                $campo .= ' "char"';
                 break;
             case 'sqlite':
                 $campo .= ' text';
@@ -245,10 +245,10 @@ class DataType
         }
         switch ($sgdb){
             case 'pgsql':
-                return 'now()';
+                return ' now() ';
                 break;
             case 'mysql':
-                return "current_timestamp";
+                return " current_timestamp ";
                 break;
             case 'sqlite':
                 //$campo .= ' AUTO INCREMENT';

@@ -1,9 +1,8 @@
 <?php
 namespace fw_Gunicorn\kernel\classes\abstracts;
 
-use fw_Gunicorn\kernel\classes\interfaces\iModels;
-use fw_Gunicorn\kernel\engine\dataBase\ConexionDataBase;
 use fw_Gunicorn\kernel\engine\dataBase\DataBase;
+use fw_Gunicorn\kernel\engine\dataBase\Func\FindModel;
 
 abstract class aModels extends DataBase {
     private $structModel;
@@ -77,12 +76,51 @@ abstract class aModels extends DataBase {
      * @param array $conditions son las condiciones que debe cumplir el query para poder ejecutar una sentencia SQL
      * @return $this
      */
-    public function where(Array $conditions){
+    public function where($conditions){
+        if(!is_array($conditions))
+            $conditions = explode(',', $conditions);
+
         $this->_where = $this->renderWhere($conditions);
 
         return $this;
     }
+    public function selected_related($model){
+        /* obtiene el array de fk del model principal */
+        $fk = $this->fk;
 
+        /* busca e instancia el modelo con el que se desea hacer join */
+        $Find = new FindModel($model);
+        $instance_model = $Find->instanceModelFound();
+
+        /* obtiene los pk's del modelo con que se desea hacer join */
+        $pk_model = $instance_model->__setPrimary();
+
+        /* corro los fk del modelo principal en busca de alguna relacion con el modelo que se desea hacer join */
+        $field_related_join = ""; #campo donde hace join el model que se desea hacer join
+        $field_related_model = ""; #campo con el que hace join el modelo principal
+        foreach ($fk as $field_related => $val_fk){
+            foreach ($pk_model as $pk_model_related){
+                if(preg_match('/('.$pk_model_related.')/', $val_fk, $coincidencias, PREG_OFFSET_CAPTURE, 3)){
+                    $field_related_join = $instance_model->__getNameModel() . '.' . $pk_model_related;
+                    $field_related_model = $this->__getNameModel() . '.' . $field_related;
+                }
+            }
+        }
+
+        if(empty($field_related_model))
+            throw new \Exception("The ".$this->__getNameModel()." model has no foreign key with the ".$instance_model->__getNameModel(). " model");
+
+        $join =  ' INNER JOIN ' .$instance_model->__getNameModel() . ' on ' .$field_related_join.' = '.$field_related_model;
+
+        if(count($this->_join) == 0)
+            $this->_join[] = " from " . $this->__getNameModel() .$join;
+        else
+            $this->_join[] = $join;
+        echo '<pre>';
+        print_r($this->_join);
+
+        return $this;
+    }
     /**
      * Verifica que los campos involucrados en la condicion existen en el modelo
      * @param $conditions array de condiciones que se colocan en la clausula where del query
@@ -91,12 +129,10 @@ abstract class aModels extends DataBase {
     private function renderWhere($conditions){
         $where = " where ";
         foreach ($conditions as $key => $value){
-
             if(preg_match('/=/', $value)){
                 $condition = explode('=', $value);
                 $field_condition = trim($condition[0]);
             }
-
 
             /* si tiene un or, in, not in elimina el signo de llaves */
             if(preg_match('/{or}/', $value))

@@ -8,17 +8,23 @@
 namespace fw_Gunicorn\kernel\engine\dataBase;
 
 use fw_Gunicorn\kernel\classes\abstracts\aModels;
+
+
 use PDO;
 
 abstract class DataBase extends PDO
 {
     protected $_where = "";
+    protected $_join = array();
 
     abstract protected function __getNameModel();
     abstract protected function __getFieldsModel();
 
     public function __construct()
     {
+
+    }
+    private function setConexion(){
         $params = unserialize(DATABASE);
 
         $driver = $params['ENGINE'];
@@ -94,7 +100,11 @@ abstract class DataBase extends PDO
         $SELECT .= $field . ' from ' . $this->__getNameModel() .' '. $this->_where;
 
         echo $SELECT;
+        #$this->setConexion();
 
+        /*
+        $stmt = parent::prepare($SELECT);
+        $stmt->execute();*/
         return array();
         #echo $this->__getNameModel();
 
