@@ -1,35 +1,26 @@
 <?php
+
+/**
+ * Esta clase abstracta se encarga de comunicar con los template
+ */
 namespace fw_Gunicorn\kernel\classes\abstracts;
 
-use fw_Gunicorn\kernel\engine\dataBase;
 use fw_Gunicorn\kernel\engine\middleware\Response;
 use Twig_Loader_Filesystem;
 use Twig_Environment;
 
 abstract class aController{
 
-    #private $path_app;
+    private $app;
     private $db;
     private $dir_template;
 
 
     public function __construct($app){
         $this->setStartEngineTemplate($app);
-        /* negar que el controlador se conecte a la db
-         * if(defined ('DATABASE')){
-            $this->db = new dataBase\ConexionDataBase();
-        }*/
 
     }
-    /**
-    * Return Object DataBase
-    */
-    /*public function DB(){
-        if(!defined ('DATABASE')){
-            die('The connection to database is not defined');
-        }
-        return $this->db;
-    }*/
+
     private function addContextToken($context){
         /* si la cookie de token esta definida la agrega al contexto del template para que pueda ser usada en el template */
         if(isset($_SESSION['csrftoken'])){
@@ -83,11 +74,36 @@ abstract class aController{
 
     }*/
     private function setStartEngineTemplate($app){
+
         $this->dir_template = $app . TEMPLATE_DIR;
         if(!file_exists($this->dir_template)){
             die('El directorio para las vistas no esta creado, consulte el archivo settings.php y cree el directorio por favor');
         }
         $this->loader_template = new Twig_Loader_Filesystem($this->dir_template);
+
+        $this->detectApp($app);
     }
 
+    private function detectApp($path_app){
+        $app = explode('/', $path_app);
+        $this->app = trim($app[count($app) - 2]);
+    }
+
+    /**
+     * @param $model Nombre del modelo
+     * @return una instancia del modelo.
+     */
+    protected function Model($model){
+        $file_model = BASE_DIR . 'apps/' . $this->app .'/models/'. $model . '.php';
+
+
+        if(!file_exists($file_model))
+            die('Sorry there is no model you want to instantiate');
+
+
+        $namespace = 'apps\\' . $this->app .'\\models\\'. $model;
+
+        $instanceModel = new $namespace;
+        return $instanceModel;
+    }
 }
