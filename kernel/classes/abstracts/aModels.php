@@ -134,6 +134,10 @@ abstract class aModels extends DataBase {
         }
         throw new \Exception("The field $name_field does not exist in the model ");
     }
+
+    /**
+     * @return string Retorna los campos separados por coma (,)
+     */
     protected function __getFieldsModel(){
         $fields = "";
         foreach (aModels::$fields as $value){
