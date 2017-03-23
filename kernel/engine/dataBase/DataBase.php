@@ -16,14 +16,11 @@ abstract class DataBase extends PDO
 {
     protected $_where = "";
     protected $_join = array();
+    protected $_field_join = array();
 
     abstract protected function __getNameModel();
     abstract protected function __getFieldsModel();
 
-    public function __construct()
-    {
-
-    }
     private function setConexion(){
         $params = unserialize(DATABASE);
 
@@ -84,22 +81,51 @@ abstract class DataBase extends PDO
                 break;
         }
     }
+    public function run(){
+        echo '<pre>';
+        print_r($this->_join);
+        print_r($this->_where);
+    }
 
+    private function getSelectiveFields(Array $fields){
+        $select = "";
+        foreach ($fields as $model => $value) {
+            /* creo un array de campos para el modelo que indica la variable $model */
+            $array_field = explode(',', $value);
+            foreach ($array_field as $field) {
+                $var = strtolower(trim($model)) . "." . trim($field);
+                $this->checkFieldExistsModel($var);
+                $select .= $var . ",";
+            }
+        }
+        return trim($select,',');
+    }
     /**
      * Crea una consulta a la db
      * @param string $field campos que retornara la consulta.
      * @return array Arrray con el resultado de la consulta.
      */
     public function find($field = ""){
-        $SELECT = "select ";
-        if(!empty($field))
+        $SELECT = "SELECT ";
+        if(!empty($field) && !is_array($field))
             $this->checkFieldExistsModel($field);
+
+        elseif (is_array($field)) 
+            $field = $this->getSelectiveFields($field);
+
         else
             $field = $this->__getFieldsModel();
 
-        $SELECT .= $field . ' from ' . $this->__getNameModel() .' '. $this->_where;
+        # si e mayor a cero entonces la consulta es un inner join
+        if(count($this->_join) > 0)
+            $SELECT .= $field . $this->getInnerJoin() .' '. $this->_where;
+            
+        else
+            $SELECT .= $field . ' FROM ' . $this->__getNameModel() .' '. $this->_where;
+
 
         echo $SELECT;
+
         #$this->setConexion();
 
         /*
@@ -108,6 +134,13 @@ abstract class DataBase extends PDO
         return array();
         #echo $this->__getNameModel();
 
+    }
+    private function getInnerJoin(){
+        $inner = "";
+        foreach ($this->_join as $key => $value) {
+            $inner .= " ".$value;
+        }
+        return $inner;
     }
     private function checkFieldExistsModel($field){
         $array_field = explode(',', $field);
