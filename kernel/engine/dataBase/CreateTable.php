@@ -70,7 +70,7 @@ class CreateTable{
 
             }catch (\PDOException $e){
                 echo $e->getMessage() . PHP_EOL;
-                echo $sql_fk;
+                echo $sql_fk[0];
                 die();
             }
 

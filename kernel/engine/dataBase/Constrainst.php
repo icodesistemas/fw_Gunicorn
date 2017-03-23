@@ -20,21 +20,18 @@ class Constrainst
         $driver = $params['ENGINE'];
 
         if ($driver == 'mysql'){
-            $fk = "ALTER TABLE {origin} ADD INDEX indx_" . getNamerandom() . " ({field_origin} ASC); 
-                    ALTER TABLE {origin}
-                    ADD CONSTRAINT fk_" . getNamerandom() . " FOREIGN KEY {field_origin}
-                    REFERENCES $model_reference($field_reference) MATCH SIMPLE
-                    ON UPDATE $on_update
-                    ON DELETE $on_delete";
+            $fk = "ALTER TABLE {origin} ADD INDEX indx_" . getNamerandom() . " ({field_origin} ASC);";
         }elseif ($driver == 'pgsql'){
-            $fk = "CREATE INDEX indx_" . getNamerandom() . " ON {origin}({field_origin} ASC NULLS LAST); 
-                ALTER TABLE {origin}
+            $fk = "CREATE INDEX indx_" . getNamerandom() . " ON {origin}({field_origin} ASC NULLS LAST);";
+                
+
+        }
+        $fk .= "ALTER TABLE {origin}
                 ADD CONSTRAINT fk_" . getNamerandom() . " FOREIGN KEY ({field_origin})
                 REFERENCES $model_reference($field_reference) MATCH SIMPLE
                 ON UPDATE $on_update
                 ON DELETE $on_delete";
 
-        }
         return $fk;
     }
 
