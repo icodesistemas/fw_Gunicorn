@@ -18,9 +18,9 @@ abstract class aModels extends DataBase {
     abstract protected function __setUnique();
     abstract protected function __foreignKey();
 
-    public function __construct($model_name)
+    public function __construct()
     {
-        $this->setTable($model_name);
+        $this->detectNameModel();
 
         $this->structModel = $this->__fields__();
         $this->uniq = $this->__setUnique();
@@ -28,14 +28,20 @@ abstract class aModels extends DataBase {
         $this->fk = $this->__foreignKey();
 
         $this->extractFields();
-        parent::__construct();
+        
+    }
+    private function detectNameModel(){
+        
+        $name_model = explode('\\',get_class($this));
+        $model_name = trim(strtolower($name_model[count($name_model) -1]));
+        $this->setTable(strtolower($model_name));
     }
 
     /**
      * Extrae los campos de la estructura del model, y los coloca en el array fields siendo el nombre del campo
      * la llave y el valor el tipo de dato
      */
-    private function extractFields(){
+    private function extractFields(){        
         foreach ($this->structModel as $key => $value){
             /* obtiene el tipo de dato, simplicandolos a solo numericos y de cadena */
 
@@ -63,29 +69,17 @@ abstract class aModels extends DataBase {
             ){
                 $tipo_dato = 'STRING';
             }
-            aModels::$fields[] = [trim($key) => $tipo_dato];
+            aModels::$fields[] = [ $this->model . '.' . trim($key) => $tipo_dato];
             #$this->fields[] = trim($key);
         }
+        
     }
     private function setTable($table){
         $this->model = $table;
     }
-
-    /**
-     * Crea un la clausula where
-     * @param array $conditions son las condiciones que debe cumplir el query para poder ejecutar una sentencia SQL
-     * @return $this
-     */
-    public function where($conditions){
-        if(!is_array($conditions))
-            $conditions = explode(',', $conditions);
-
-        $this->_where = $this->renderWhere($conditions);
-
-        return $this;
-    }
-    public function selected_related($model){
-        /* obtiene el array de fk del model principal */
+    
+    private function prepareInnerJoin($model){
+         /* obtiene el array de fk del model principal */
         $fk = $this->fk;
 
         /* busca e instancia el modelo con el que se desea hacer join */
@@ -113,21 +107,48 @@ abstract class aModels extends DataBase {
         $join =  ' INNER JOIN ' .$instance_model->__getNameModel() . ' on ' .$field_related_join.' = '.$field_related_model;
 
         if(count($this->_join) == 0)
-            $this->_join[] = " from " . $this->__getNameModel() .$join;
+            $this->_join[] = " FROM " . $this->__getNameModel() .$join;
         else
             $this->_join[] = $join;
-        echo '<pre>';
-        print_r($this->_join);
+        
+
+        
+    }
+    public function selected_related($model){
+       
+        if(is_array($model)){
+            foreach ($model as $key => $value) {
+                $this->prepareInnerJoin($value);    
+            }
+        }else
+            $this->prepareInnerJoin($model);
+        
+        return $this;
+        
+    }
+
+    /**
+     * Crea un la clausula where
+     * @param array $conditions son las condiciones que debe cumplir el query para poder ejecutar una sentencia SQL
+     * @return $this
+     */
+    public function where($conditions){
+        if(!is_array($conditions))
+            $conditions = explode(',', $conditions);
+
+        $this->_where = $this->renderWhere($conditions);
 
         return $this;
     }
+
     /**
      * Verifica que los campos involucrados en la condicion existen en el modelo
      * @param $conditions array de condiciones que se colocan en la clausula where del query
      * @return Retorna el where listo para ser usado por el query
      */
     private function renderWhere($conditions){
-        $where = " where ";
+        $where = " WHERE ";
+        
         foreach ($conditions as $key => $value){
             if(preg_match('/=/', $value)){
                 $condition = explode('=', $value);
@@ -141,9 +162,12 @@ abstract class aModels extends DataBase {
                 $value =  str_replace('{in}', 'IN', $value);
             else if(preg_match('/{not in}/', $value))
                 $value =  str_replace('{in}', 'NOT IN', $value);
-            else
-                aModels::findFieldModel($field_condition);
+            else{
 
+                aModels::findFieldModel(strtolower($field_condition));
+                $value = strtolower(addslashes(strip_tags($value)));
+            }
+            
             $where .= " $value and ";
         }
         $where = trim($where,' and ');
@@ -160,7 +184,8 @@ abstract class aModels extends DataBase {
      * @param $name_field nombre del campo que se desea buscar
      * @return bool True si el campo pertenece al modelo y False y no pertenece
      */
-    static function findFieldModel($name_field){
+    static function findFieldModel($name_field){     
+
         foreach (aModels::$fields as $value){
             foreach ($value as $field => $type){
                 if($name_field == $field){
@@ -176,12 +201,14 @@ abstract class aModels extends DataBase {
      */
     protected function __getFieldsModel(){
         $fields = "";
+        echo '<pre>';
+        print_r(aModels::$fields);
         foreach (aModels::$fields as $value){
             foreach ($value as $field => $type){
                 $fields .= $field.  ', ';
             }
         }
-
+        die();
         return trim($fields, ', ');
     }
     protected function __getNameModel(){
