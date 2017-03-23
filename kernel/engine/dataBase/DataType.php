@@ -76,7 +76,7 @@ class DataType
         if ($notNull)
             $campo .= " NOT NULL ";
 
-        if($default >=0 || $default <=0)
+        if( ($default >=0 || $default <=0) && !empty($default))
             $campo .= " DEFAULT $default ";
 
 
@@ -154,7 +154,7 @@ class DataType
                 $campo .= ' "char"';
                 break;
             case 'mysql':
-                $campo .= ' "char"';
+                $campo .=  "char";
                 break;
             case 'sqlite':
                 $campo .= ' text';

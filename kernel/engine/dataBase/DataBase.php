@@ -12,13 +12,14 @@ use fw_Gunicorn\kernel\classes\abstracts\aModels;
 
 use PDO;
 
-abstract class DataBase extends PDO
+abstract class DataBase
 {
+    private $db = "";
     protected $_where = "";
     protected $_join = array();
     protected $_field_join = array();
 
-    abstract protected function __getNameModel();
+    abstract public function __getNameModel();
     abstract protected function __getFieldsModel();
 
     private function setConexion(){
@@ -54,7 +55,8 @@ abstract class DataBase extends PDO
             $pass = null;
         }
         try {
-            parent::__construct($dsn, $user, $pass, $options);
+            $this->db = new PDO($dsn, $user, $pass, $options);
+
             restore_exception_handler();
 
             if (!empty($params['SHEMA'])) {
@@ -148,5 +150,42 @@ abstract class DataBase extends PDO
             aModels::findFieldModel($value);
         }
         return true;
+    }
+    public function raw($sql, $data = array()){
+        if(empty($this->db))
+            $this->setConexion();
+
+        $stmt = $this->db->prepare($sql);
+
+        if(empty($data))
+            $stmt->execute();
+        else
+            $stmt->execute($data);
+
+        /* verifica si es una consulta lo que se ejecuto: insert, update, select, delete*/
+
+        $tipo_sentencia = substr($sql, 0,5);
+
+        if(preg_match('/select/', strtolower($tipo_sentencia))){
+            $result = $stmt->fetchAll(PDO::FETCH_BOTH);
+            $stmt->closeCursor();
+            return $result;
+
+        }else if(preg_match('/delete/', strtolower($tipo_sentencia)) || preg_match('/update/', strtolower($tipo_sentencia))){
+            $afectados = $stmt->rowCount();
+            $stmt->closeCursor();
+            return $afectados;
+
+        }else if(preg_match('/insert/', strtolower($tipo_sentencia))){
+            if (parent::getAttribute($this->db->ATTR_DRIVER_NAME) == 'mysql'){
+                $lastInsertId = $this->db->lastInsertId();
+            }else
+                $lastInsertId = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $stmt->closeCursor();
+            return $lastInsertId;
+
+        }
+
     }
 }

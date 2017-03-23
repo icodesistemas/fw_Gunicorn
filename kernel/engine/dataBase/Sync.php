@@ -3,12 +3,24 @@ namespace fw_Gunicorn\kernel\engine\dataBase\Sync;
 
 use fw_Gunicorn\kernel\engine\dataBase\CreateTable;
 
-include BASE_DIR . '/fw_Gunicorn/kernel/engine/dataBase/TypeFields.php';
+
 
 $path_folder_models = '';
 $namespaces = '';
+
+function getInstancModel($model){
+    global $namespaces;
+    $var = str_replace(' extends aModels{','',$model);
+    $var = str_replace(' extends aModels {','',$var);
+    $var = str_replace('class ','',$var);
+
+    $var = trim(str_replace('extends aModels','',$var));
+
+    return $namespaces . $var;
+}
+
 function getClassModel(){
-    global $path_folder_models, $namespaces;
+    global $path_folder_models;
 
     $dh = opendir($path_folder_models);
 
@@ -20,21 +32,12 @@ function getClassModel(){
             while(!feof($reader)) {
                 $linea = fgets($reader);
                 if(preg_match("/class /", $linea)){
-                    $var = str_replace(' extends aModels {','',$linea);
-                    $var = str_replace(' extends aModels{','',$var);
 
-                    $var = str_replace(' implements iMigrate {','',$linea);
-                    $var = str_replace(' implements iMigrate{','',$var);
+                    $class_model = getInstancModel($linea);
 
-                    $var = str_replace('class ','',$var);
+                    $obj_model = new $class_model;
 
-                    $var = trim(str_replace('extends aModels','',$var));
-
-                    $class = $namespaces . $var;
-                    $obj = new $class;
-                    $obj->__init__();
-                    CreateTable::_create($obj);
-                    //$obj->__foreignKey();
+                    CreateTable::_create($obj_model);
 
                 }
 
@@ -53,19 +56,9 @@ function getClassModel(){
                 $linea = fgets($reader);
 
                 if(preg_match("/class /", $linea)){
-                    $var = str_replace(' extends aModels {','',$linea);
-                    $var = str_replace(' extends aModels{','',$var);
-
-                    $var = str_replace(' implements iMigrate {','',$linea);
-                    $var = str_replace(' implements iMigrate{','',$var);
-
-                    $var = str_replace('class ','',$var);
-
-                    $var = trim(str_replace('extends aModels','',$var));
-
-                    $class = $namespaces . $var;
-                    $obj = new $class;
-                    $obj->__foreignKey();
+                    $class_model = getInstancModel($linea);
+                    $obj_model = new $class_model;
+                    CreateTable::_foreignKey($obj_model);
 
                 }
 

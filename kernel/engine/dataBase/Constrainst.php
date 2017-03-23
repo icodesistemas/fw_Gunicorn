@@ -14,6 +14,7 @@ class Constrainst
     static function ForeignKey($model_reference, $field_reference,
                                $on_delete = "NO ACTION", $on_update = "NO ACTION"){
         $fk = "
+            ALTER TABLE {origin} ADD INDEX indx_".getNamerandom()." ({field_origin} ASC);
             ALTER TABLE {origin}
             ADD CONSTRAINT fk_".getNamerandom()." FOREIGN KEY {field_origin}
             REFERENCES $model_reference($field_reference) MATCH SIMPLE

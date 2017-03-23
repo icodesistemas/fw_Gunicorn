@@ -13,10 +13,10 @@ abstract class aModels extends DataBase {
     private $fk;
 
 
-    abstract protected function __fields__();
-    abstract protected function __setPrimary();
-    abstract protected function __setUnique();
-    abstract protected function __foreignKey();
+    abstract public function __fields__();
+    abstract public function __setPrimary();
+    abstract public function __setUnique();
+    abstract public function __foreignKey();
 
     public function __construct()
     {
@@ -211,7 +211,7 @@ abstract class aModels extends DataBase {
         die();
         return trim($fields, ', ');
     }
-    protected function __getNameModel(){
+    public function __getNameModel(){
         return $this->model;
     }
 }
