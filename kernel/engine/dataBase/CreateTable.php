@@ -15,7 +15,7 @@ class CreateTable{
 
     private static function _unique(Array $field){
 
-        self::$uniq = 'CONSTRAINT '.getNamerandom().'_uniq UNIQUE ('.implode(',', $field).')';
+        return 'CONSTRAINT '.getNamerandom().'_uniq UNIQUE ('.implode(',', $field).')';
 
     }
 	private static function _primaryKey($field){
@@ -59,7 +59,13 @@ class CreateTable{
             $var_fk = str_replace('{origin}', $nameModel,$fk);
             $sql_fk = str_replace('{field_origin}', $field, $var_fk);
             try{
-                $tableModel->raw($sql_fk);
+                $sql_fk =explode(";", $sql_fk);
+
+                #excuete create index
+                $tableModel->raw($sql_fk[0]);
+
+                #excuete create forenkey
+                $tableModel->raw($sql_fk[1]);
                 echo 'ForeigKey ' . $tableModel->__getNameModel() . ' create finish' . PHP_EOL;
 
             }catch (\PDOException $e){
